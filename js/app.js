@@ -1,13 +1,26 @@
-import { getMissionById, getMissionsByCourse, missions } from "./missions.js";
+import { missions } from "./missions.js";
 import { runCode } from "./runner.js";
 import {
   ensureDemoAccounts,
+  getPublicUsers,
   getSession,
   login,
   logout,
   register,
 } from "./auth.js";
-import { completeMission, getProgress, getRank } from "./store.js";
+import {
+  completeMission,
+  getAllProgress,
+  getProgress,
+  getRank,
+  resetAllProgress,
+} from "./store.js";
+import {
+  applyMissionSettings,
+  getAdminSettings,
+  resetAdminSettings,
+  updateMissionSettings,
+} from "./admin.js";
 
 const viewLabels = {
   dashboard: "base",
@@ -32,6 +45,14 @@ const sessionPanel = document.querySelector("#session-panel");
 let currentSession = getSession();
 let authMode = "login";
 
+const practiceRanks = [
+  { id: "practice-1", name: "KernelConPalta", xp: 4380, completed: 17 },
+  { id: "practice-2", name: "ValpoDebugger", xp: 3560, completed: 14 },
+  { id: "practice-3", name: "CautinMaster", xp: 2710, completed: 12 },
+  { id: "practice-4", name: "ByteDeTomate", xp: 1640, completed: 8 },
+  { id: "practice-5", name: "NullDeQuillota", xp: 720, completed: 4 },
+];
+
 function refreshIcons() {
   if (window.lucide) {
     window.lucide.createIcons();
@@ -51,22 +72,46 @@ function showView(name) {
   });
 
   currentViewLabel.textContent = viewLabels[name] ?? name;
+  if (name === "ranking") renderRanking();
+  if (name === "admin") renderAdmin();
   sidebar.classList.remove("is-open");
   document.querySelector("#main-content").focus({ preventScroll: true });
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
+function getCatalog({ includeDisabled = false } = {}) {
+  return missions
+    .map(applyMissionSettings)
+    .filter(
+      (mission) =>
+        includeDisabled || mission.enabled || currentSession?.role === "admin",
+    );
+}
+
+function getConfiguredMission(id) {
+  const mission = missions.find((item) => item.id === id);
+  return mission ? applyMissionSettings(mission) : undefined;
+}
+
 function renderMissionGrid(course = "all") {
-  const visibleMissions = getMissionsByCourse(course);
+  const visibleMissions = getCatalog().filter(
+    (mission) => course === "all" || mission.course === course,
+  );
   const completed = new Set(getProgress(currentSession?.userId).completed);
 
   missionGrid.innerHTML = visibleMissions
     .map(
       (mission) => `
-        <article class="mission-card ${completed.has(mission.id) ? "is-complete" : ""}">
+        <article class="mission-card ${completed.has(mission.id) ? "is-complete" : ""} ${mission.enabled ? "" : "is-disabled"}">
           <div class="mission-card-topline">
             <span>${mission.courseLabel}</span>
-            <strong>${completed.has(mission.id) ? "COMPLETA" : `+${mission.points} XP`}</strong>
+            <strong>${
+              !mission.enabled
+                ? "PAUSADA"
+                : completed.has(mission.id)
+                  ? "COMPLETA"
+                  : `+${mission.points} XP`
+            }</strong>
           </div>
           <div class="mission-index" aria-hidden="true">${String(mission.order).padStart(2, "0")}</div>
           <p class="mission-module">${mission.module}</p>
@@ -76,7 +121,12 @@ function renderMissionGrid(course = "all") {
             <span><i data-lucide="signal" aria-hidden="true"></i>${mission.difficulty}</span>
             <span><i data-lucide="clock-3" aria-hidden="true"></i>${mission.duration} min</span>
           </div>
-          <button class="mission-open" type="button" data-mission-open="${mission.id}">
+          <button
+            class="mission-open"
+            type="button"
+            data-mission-open="${mission.id}"
+            ${mission.enabled ? "" : "disabled"}
+          >
             ${completed.has(mission.id) ? "Repetir mision" : "Ver briefing"}
             <i data-lucide="arrow-up-right" aria-hidden="true"></i>
           </button>
@@ -90,8 +140,16 @@ function renderMissionGrid(course = "all") {
 
 function renderNextMission() {
   const completed = new Set(getProgress(currentSession?.userId).completed);
-  const mission = missions.find((item) => !completed.has(item.id)) ?? missions[0];
+  const activeMissions = getCatalog().filter((mission) => mission.enabled);
+  const mission =
+    activeMissions.find((item) => !completed.has(item.id)) ?? activeMissions[0];
   const target = document.querySelector("#next-mission");
+
+  if (!mission) {
+    target.className = "empty-state";
+    target.textContent = "No hay misiones activas.";
+    return;
+  }
 
   target.className = "next-mission";
   target.innerHTML = `
@@ -117,8 +175,8 @@ function renderNextMission() {
 }
 
 function openMission(id) {
-  const mission = getMissionById(id);
-  if (!mission) return;
+  const mission = getConfiguredMission(id);
+  if (!mission || !mission.enabled) return;
 
   missionContent.innerHTML = `
     <header class="modal-header">
@@ -181,7 +239,7 @@ function escapeHtml(value) {
 }
 
 async function executeLabCode() {
-  const mission = getMissionById(codeEditor.dataset.missionId);
+  const mission = getConfiguredMission(codeEditor.dataset.missionId);
   runButton.disabled = true;
   consoleOutput.textContent = "$ ejecutando proceso aislado...";
 
@@ -215,6 +273,169 @@ async function executeLabCode() {
 
   consoleOutput.textContent = lines.join("\n") || "[OK] sin salida";
   runButton.disabled = false;
+}
+
+function renderRanking() {
+  const progressDatabase = getAllProgress();
+  const localPlayers = getPublicUsers().map((user) => {
+    const progress = progressDatabase[user.id] ?? getProgress(user.id);
+    return {
+      id: user.id,
+      name: user.name,
+      xp: progress.xp,
+      completed: progress.completed.length,
+      local: true,
+    };
+  });
+  const rows = [...practiceRanks, ...localPlayers]
+    .sort((a, b) => b.xp - a.xp)
+    .map(
+      (player, index) => `
+        <tr class="${player.id === currentSession?.userId ? "is-current" : ""}">
+          <td class="rank-position">${String(index + 1).padStart(2, "0")}</td>
+          <td>
+            <strong>${escapeHtml(player.name)}</strong>
+            <small>${player.local ? "usuario local" : "rival de practica"}</small>
+          </td>
+          <td>${player.completed}/20</td>
+          <td>${getRank(player.xp)}</td>
+          <td class="rank-xp">${player.xp} XP</td>
+        </tr>
+      `,
+    )
+    .join("");
+
+  document.querySelector("#ranking-table").innerHTML = `
+    <p class="ranking-note">
+      Ranking de demostracion: combina tus usuarios locales con rivales ficticios.
+      No envia datos a un servidor.
+    </p>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Operador</th>
+            <th scope="col">Misiones</th>
+            <th scope="col">Rango</th>
+            <th scope="col">Puntaje</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+  `;
+}
+
+function renderAdmin() {
+  const panel = document.querySelector("#admin-panel");
+  if (currentSession?.role !== "admin") {
+    panel.innerHTML = `
+      <div class="empty-state">
+        <i data-lucide="lock-keyhole" aria-hidden="true"></i>
+        <p>Se requiere una sesion administrativa.</p>
+      </div>
+    `;
+    refreshIcons();
+    return;
+  }
+
+  const users = getPublicUsers();
+  const progressEntries = Object.values(getAllProgress());
+  const totalCompleted = progressEntries.reduce(
+    (sum, item) => sum + item.completed.length,
+    0,
+  );
+  const totalXp = progressEntries.reduce((sum, item) => sum + item.xp, 0);
+  const catalog = getCatalog({ includeDisabled: true });
+
+  panel.innerHTML = `
+    <div class="admin-stats">
+      <article><span>Usuarios</span><strong>${users.length}</strong></article>
+      <article><span>Completadas</span><strong>${totalCompleted}</strong></article>
+      <article><span>XP emitido</span><strong>${totalXp}</strong></article>
+      <article>
+        <span>Activas</span>
+        <strong>${catalog.filter((mission) => mission.enabled).length}/${catalog.length}</strong>
+      </article>
+    </div>
+    <section class="admin-section" aria-labelledby="mission-admin-title">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">CONTROL DE CONTENIDO</p>
+          <h2 id="mission-admin-title">Misiones publicadas</h2>
+        </div>
+      </div>
+      <div class="admin-mission-list">
+        ${catalog
+          .map(
+            (mission) => `
+              <div class="admin-mission-row">
+                <div>
+                  <strong>${String(mission.order).padStart(2, "0")} // ${mission.title}</strong>
+                  <span>${mission.courseLabel}</span>
+                </div>
+                <label>
+                  <span>XP</span>
+                  <input
+                    type="number"
+                    min="10"
+                    max="2000"
+                    step="10"
+                    value="${mission.points}"
+                    data-admin-points="${mission.id}"
+                  />
+                </label>
+                <label class="switch-label">
+                  <input
+                    type="checkbox"
+                    data-admin-enabled="${mission.id}"
+                    ${mission.enabled ? "checked" : ""}
+                  />
+                  <span>Activa</span>
+                </label>
+              </div>
+            `,
+          )
+          .join("")}
+      </div>
+    </section>
+    <section class="admin-section danger-zone" aria-labelledby="data-admin-title">
+      <div>
+        <p class="eyebrow">BASE LOCAL</p>
+        <h2 id="data-admin-title">Datos de demostracion</h2>
+        <p>Exporta un respaldo o reinicia el progreso guardado en este navegador.</p>
+      </div>
+      <div class="admin-actions">
+        <button class="secondary-button" type="button" data-admin-export>
+          <i data-lucide="download" aria-hidden="true"></i>
+          Exportar JSON
+        </button>
+        <button class="danger-button" type="button" data-admin-reset>
+          <i data-lucide="rotate-ccw" aria-hidden="true"></i>
+          Reiniciar progreso
+        </button>
+      </div>
+    </section>
+  `;
+  refreshIcons();
+}
+
+function exportLocalData() {
+  const snapshot = {
+    exportedAt: new Date().toISOString(),
+    users: getPublicUsers(),
+    progress: getAllProgress(),
+    admin: getAdminSettings(),
+  };
+  const url = URL.createObjectURL(
+    new Blob([JSON.stringify(snapshot, null, 2)], { type: "application/json" }),
+  );
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = `tomatin-backup-${new Date().toISOString().slice(0, 10)}.json`;
+  anchor.click();
+  URL.revokeObjectURL(url);
 }
 
 function showToast(message) {
@@ -251,6 +472,8 @@ function renderAccount() {
       "all",
   );
   renderNextMission();
+  renderRanking();
+  if (currentSession?.role === "admin") renderAdmin();
 }
 
 function setAuthMode(mode) {
@@ -302,6 +525,45 @@ document.querySelector("#mobile-menu").addEventListener("click", () => {
 runButton.addEventListener("click", executeLabCode);
 document.querySelector("#clear-console").addEventListener("click", () => {
   consoleOutput.textContent = "$ consola limpia";
+});
+
+document.querySelector("#admin-panel").addEventListener("change", (event) => {
+  if (currentSession?.role !== "admin") return;
+
+  if (event.target.matches("[data-admin-points]")) {
+    const points = Number(event.target.value);
+    if (Number.isFinite(points) && points >= 10 && points <= 2000) {
+      updateMissionSettings(event.target.dataset.adminPoints, { points });
+      renderAccount();
+      showToast("Puntaje actualizado.");
+    }
+  }
+
+  if (event.target.matches("[data-admin-enabled]")) {
+    updateMissionSettings(event.target.dataset.adminEnabled, {
+      enabled: event.target.checked,
+    });
+    renderAccount();
+    showToast(event.target.checked ? "Mision activada." : "Mision pausada.");
+  }
+});
+
+document.querySelector("#admin-panel").addEventListener("click", (event) => {
+  if (currentSession?.role !== "admin") return;
+
+  if (event.target.closest("[data-admin-export]")) {
+    exportLocalData();
+  }
+
+  if (
+    event.target.closest("[data-admin-reset]") &&
+    window.confirm("Se borrara todo el progreso local. Esta accion no se puede deshacer.")
+  ) {
+    resetAllProgress();
+    resetAdminSettings();
+    renderAccount();
+    showToast("Progreso y ajustes reiniciados.");
+  }
 });
 
 document.querySelector("#auth-trigger").addEventListener("click", openAccountDialog);
@@ -396,7 +658,7 @@ document.addEventListener("click", (event) => {
 
   const startTrigger = event.target.closest("[data-start-mission]");
   if (startTrigger) {
-    const mission = getMissionById(startTrigger.dataset.startMission);
+    const mission = getConfiguredMission(startTrigger.dataset.startMission);
     document.querySelector("#code-editor").value = mission.starterCode;
     document.querySelector("#code-editor").dataset.missionId = mission.id;
     missionDialog.close();

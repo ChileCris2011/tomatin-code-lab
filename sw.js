@@ -2,6 +2,7 @@ const CACHE_NAME = "tomatin-code-lab-v2";
 const APP_SHELL = [
   "./",
   "./index.html",
+  "./404.html",
   "./styles.css",
   "./manifest.webmanifest",
   "./assets/favicon.svg",

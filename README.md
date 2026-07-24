@@ -4,6 +4,8 @@ Plataforma web gratuita para practicar Programacion I y II con veinte misiones
 originales, evaluacion automatica, humor chileno y una estetica glass-terminal.
 Funciona como sitio estatico en GitHub Pages y puede instalarse para uso offline.
 
+**Sitio:** [eeminionn.github.io/tomatin-code-lab](https://eeminionn.github.io/tomatin-code-lab/)
+
 > Proyecto independiente. No esta afiliado ni respaldado por MIT. El temario
 > toma como referencia conceptos habituales de cursos universitarios de
 > introduccion a ciencias de la computacion; todos los enunciados y recursos de

@@ -648,6 +648,21 @@ h3 {
   background: rgba(18, 34, 27, 0.82);
 }
 
+.mission-card.is-complete {
+  border-color: rgba(93, 224, 230, 0.38);
+}
+
+.mission-card.is-complete::before {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  right: 0;
+  width: 34px;
+  height: 3px;
+  background: var(--cyan);
+  content: "";
+}
+
 .mission-card-topline {
   position: relative;
   z-index: 1;
@@ -932,6 +947,52 @@ h3 {
   color: var(--muted);
   font-size: 11px;
   line-height: 1.5;
+}
+
+.form-error {
+  min-height: 17px;
+  margin: -3px 0 0;
+  color: var(--red);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+#auth-fields {
+  display: grid;
+  gap: 16px;
+}
+
+.session-panel {
+  display: grid;
+  justify-items: center;
+  gap: 7px;
+  padding: 8px 0 2px;
+  text-align: center;
+}
+
+.session-avatar {
+  display: grid;
+  width: 64px;
+  height: 64px;
+  place-items: center;
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+  margin-bottom: 6px;
+  background: rgba(156, 255, 87, 0.08);
+  color: var(--green);
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 26px;
+  font-weight: 700;
+}
+
+.session-panel > span:not(.session-avatar),
+.session-panel small {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.session-panel .secondary-button {
+  margin-top: 16px;
 }
 
 .full-width {

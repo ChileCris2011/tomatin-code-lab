@@ -320,7 +320,7 @@ textarea:focus-visible,
   font-size: 9px;
 }
 
-.mobile-menu {
+.icon-button.mobile-menu {
   display: none;
 }
 
@@ -867,6 +867,30 @@ h3 {
   white-space: pre-wrap;
 }
 
+.terminal-command {
+  display: flex;
+  min-height: 44px;
+  align-items: center;
+  gap: 9px;
+  border-top: 1px solid var(--line);
+  padding: 0 14px;
+  color: var(--green);
+}
+
+.terminal-command input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--text);
+  font-size: 12px;
+}
+
+.terminal-command input::placeholder {
+  color: #5d7063;
+}
+
 .icon-button {
   display: inline-grid;
   width: 36px;
@@ -1323,6 +1347,67 @@ h3 {
   font-size: 12px;
 }
 
+.root-mode {
+  --green: #ff706c;
+  --line-strong: rgba(255, 91, 87, 0.5);
+}
+
+.matrix-mode::after {
+  position: fixed;
+  z-index: 70;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent 0,
+    transparent 7px,
+    rgba(156, 255, 87, 0.05) 8px
+  );
+  content: "";
+  animation: scan-lines 5s linear infinite;
+}
+
+.tomatin-party .brand-mark {
+  animation: tomato-signal 600ms steps(2, end) infinite;
+}
+
+.secret-pulse .workspace {
+  animation: secret-pulse 850ms ease-out;
+}
+
+@keyframes scan-lines {
+  from {
+    transform: translateY(-8px);
+  }
+  to {
+    transform: translateY(8px);
+  }
+}
+
+@keyframes tomato-signal {
+  0%,
+  100% {
+    border-color: var(--green);
+    color: var(--green);
+  }
+  50% {
+    border-color: var(--red);
+    color: var(--red);
+  }
+}
+
+@keyframes secret-pulse {
+  0% {
+    filter: none;
+  }
+  40% {
+    filter: saturate(1.7) brightness(1.16);
+  }
+  100% {
+    filter: none;
+  }
+}
+
 [hidden] {
   display: none !important;
 }
@@ -1392,7 +1477,7 @@ h3 {
     padding: 0 12px;
   }
 
-  .mobile-menu {
+  .icon-button.mobile-menu {
     display: inline-grid;
   }
 

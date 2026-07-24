@@ -13,6 +13,7 @@ import {
   getAllProgress,
   getProgress,
   getRank,
+  awardSecret,
   resetAllProgress,
 } from "./store.js";
 import {
@@ -38,6 +39,7 @@ const missionContent = document.querySelector("#mission-content");
 const codeEditor = document.querySelector("#code-editor");
 const consoleOutput = document.querySelector("#console-output");
 const runButton = document.querySelector("#run-code");
+const terminalInput = document.querySelector("#terminal-input");
 const authDialog = document.querySelector("#auth-dialog");
 const authForm = document.querySelector("#auth-form");
 const authFields = document.querySelector("#auth-fields");
@@ -52,6 +54,13 @@ const practiceRanks = [
   { id: "practice-4", name: "ByteDeTomate", xp: 1640, completed: 8 },
   { id: "practice-5", name: "NullDeQuillota", xp: 720, completed: 4 },
 ];
+
+const commandResponses = {
+  help: "Comandos publicos: help, whoami, limache, mustakis, esp32, clear.",
+  limache: "cd /estadio && npm run ascenso // proceso naranja en ejecucion",
+  mustakis: "Imaginacion + tecnologia + aprender haciendo.",
+  esp32: "Conectando Wi-Fi con 240 MHz de optimismo...",
+};
 
 function refreshIcons() {
   if (window.lucide) {
@@ -68,7 +77,10 @@ function showView(name) {
   });
 
   document.querySelectorAll(".nav-item").forEach((item) => {
-    item.classList.toggle("is-active", item.dataset.viewTarget === name);
+    const isActive = item.dataset.viewTarget === name;
+    item.classList.toggle("is-active", isActive);
+    if (isActive) item.setAttribute("aria-current", "page");
+    else item.removeAttribute("aria-current");
   });
 
   currentViewLabel.textContent = viewLabels[name] ?? name;
@@ -77,6 +89,55 @@ function showView(name) {
   sidebar.classList.remove("is-open");
   document.querySelector("#main-content").focus({ preventScroll: true });
   window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function unlockSecret(secretId, points, message) {
+  document.body.classList.add("secret-pulse");
+  window.setTimeout(() => document.body.classList.remove("secret-pulse"), 900);
+
+  if (!currentSession) {
+    showToast(`${message} Inicia sesion para guardar el secreto.`);
+    return;
+  }
+
+  const result = awardSecret(currentSession.userId, secretId, points);
+  renderAccount();
+  showToast(
+    result.awarded > 0 ? `${message} +${points} XP` : `${message} Ya estaba abierto.`,
+  );
+}
+
+function runTerminalCommand(rawCommand) {
+  const command = rawCommand.trim().toLowerCase();
+  if (!command) return;
+
+  if (command === "clear") {
+    consoleOutput.textContent = "$ consola limpia";
+    return;
+  }
+
+  let response = commandResponses[command];
+  if (command === "whoami") {
+    response = currentSession
+      ? `${currentSession.name} // rol=${currentSession.role}`
+      : "invitado // privilegios=ninguno";
+  }
+  if (command === "sudo") {
+    response =
+      "eeminionn no esta en sudoers. El incidente fue reportado a Tomatin.";
+    unlockSecret("sudo-incident", 42, "Incidente sudo registrado.");
+  }
+  if (command === "tomatin --root") {
+    response = "ROOT VEGETAL ACTIVADO // acceso al invernadero concedido";
+    document.body.classList.toggle("root-mode");
+    unlockSecret("root-vegetal", 77, "Encontraste el modo root vegetal.");
+  }
+  if (!response) {
+    response = `command not found: ${command}`;
+  }
+
+  consoleOutput.textContent += `\n$ ${rawCommand}\n${response}`;
+  consoleOutput.scrollTop = consoleOutput.scrollHeight;
 }
 
 function getCatalog({ includeDisabled = false } = {}) {
@@ -526,6 +587,28 @@ runButton.addEventListener("click", executeLabCode);
 document.querySelector("#clear-console").addEventListener("click", () => {
   consoleOutput.textContent = "$ consola limpia";
 });
+terminalInput.addEventListener("keydown", (event) => {
+  if (event.key !== "Enter") return;
+  event.preventDefault();
+  runTerminalCommand(terminalInput.value);
+  terminalInput.value = "";
+});
+
+let brandClicks = 0;
+let brandClickTimer;
+document.querySelector(".brand").addEventListener("click", () => {
+  brandClicks += 1;
+  window.clearTimeout(brandClickTimer);
+  brandClickTimer = window.setTimeout(() => {
+    brandClicks = 0;
+  }, 1800);
+
+  if (brandClicks === 7) {
+    document.body.classList.toggle("tomatin-party");
+    unlockSecret("seven-tomatins", 77, "Siete tomates alineados.");
+    brandClicks = 0;
+  }
+});
 
 document.querySelector("#admin-panel").addEventListener("change", (event) => {
   if (currentSession?.role !== "admin") return;
@@ -632,8 +715,38 @@ document.querySelector(".filter-bar").addEventListener("click", (event) => {
 
   document.querySelectorAll("[data-course-filter]").forEach((item) => {
     item.classList.toggle("is-active", item === filter);
+    item.setAttribute("aria-pressed", String(item === filter));
   });
   renderMissionGrid(filter.dataset.courseFilter);
+});
+
+const konamiSequence = [
+  "ArrowUp",
+  "ArrowUp",
+  "ArrowDown",
+  "ArrowDown",
+  "ArrowLeft",
+  "ArrowRight",
+  "ArrowLeft",
+  "ArrowRight",
+  "b",
+  "a",
+];
+let konamiIndex = 0;
+
+document.addEventListener("keydown", (event) => {
+  if (event.target.matches("input, textarea")) return;
+
+  if (event.key === konamiSequence[konamiIndex]) {
+    konamiIndex += 1;
+    if (konamiIndex === konamiSequence.length) {
+      document.body.classList.toggle("matrix-mode");
+      unlockSecret("konami-cordillera", 128, "Modo Cordillera desbloqueado.");
+      konamiIndex = 0;
+    }
+  } else {
+    konamiIndex = 0;
+  }
 });
 
 document.addEventListener("click", (event) => {
@@ -685,5 +798,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   refreshIcons();
 });
 window.addEventListener("load", refreshIcons);
+
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js").catch(() => {
+      showToast("El modo offline no pudo iniciarse en este navegador.");
+    });
+  });
+}
 
 export { refreshIcons, showView };

@@ -1,0 +1,20 @@
+{
+  "name": "Tomatin Code Lab",
+  "short_name": "Tomatin Lab",
+  "description": "Misiones originales de Programacion I y II con humor chileno.",
+  "lang": "es-CL",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#07100d",
+  "theme_color": "#07100d",
+  "icons": [
+    {
+      "src": "./assets/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
+

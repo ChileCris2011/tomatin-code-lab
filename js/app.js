@@ -1,4 +1,5 @@
 import { getMissionById, getMissionsByCourse, missions } from "./missions.js";
+import { runCode } from "./runner.js";
 
 const viewLabels = {
   dashboard: "base",
@@ -13,6 +14,9 @@ const currentViewLabel = document.querySelector("#current-view-label");
 const missionGrid = document.querySelector("#mission-grid");
 const missionDialog = document.querySelector("#mission-dialog");
 const missionContent = document.querySelector("#mission-content");
+const codeEditor = document.querySelector("#code-editor");
+const consoleOutput = document.querySelector("#console-output");
+const runButton = document.querySelector("#run-code");
 
 function refreshIcons() {
   if (window.lucide) {
@@ -159,12 +163,54 @@ function escapeHtml(value) {
     .replaceAll(">", "&gt;");
 }
 
+async function executeLabCode() {
+  const mission = getMissionById(codeEditor.dataset.missionId);
+  runButton.disabled = true;
+  consoleOutput.textContent = "$ ejecutando proceso aislado...";
+
+  const result = await runCode(codeEditor.value, mission?.tests ?? []);
+  const lines = [];
+
+  if (result.logs.length) {
+    lines.push(...result.logs.map((line) => `> ${line}`), "");
+  }
+
+  if (!result.ok) {
+    lines.push(`[ERROR] ${result.error}`);
+  } else if (!mission) {
+    lines.push("[OK] proceso terminado sin errores");
+  } else {
+    lines.push(`PRUEBAS // ${mission.title}`);
+    result.tests.forEach((test) => {
+      lines.push(`${test.passed ? "[PASS]" : "[FAIL]"} ${test.name}`);
+    });
+
+    const passed = result.tests.length > 0 && result.tests.every((test) => test.passed);
+    if (passed) {
+      lines.push("", `[MISION COMPLETA] +${mission.points} XP disponibles`);
+      document.dispatchEvent(
+        new CustomEvent("mission:passed", { detail: { mission } }),
+      );
+    } else {
+      lines.push("", "[PENDIENTE] Revisa el briefing o pide una pista.");
+    }
+  }
+
+  consoleOutput.textContent = lines.join("\n") || "[OK] sin salida";
+  runButton.disabled = false;
+}
+
 document.querySelectorAll("[data-view-target]").forEach((trigger) => {
   trigger.addEventListener("click", () => showView(trigger.dataset.viewTarget));
 });
 
 document.querySelector("#mobile-menu").addEventListener("click", () => {
   sidebar.classList.toggle("is-open");
+});
+
+runButton.addEventListener("click", executeLabCode);
+document.querySelector("#clear-console").addEventListener("click", () => {
+  consoleOutput.textContent = "$ consola limpia";
 });
 
 document.querySelector(".filter-bar").addEventListener("click", (event) => {

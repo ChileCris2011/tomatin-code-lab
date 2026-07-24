@@ -629,6 +629,156 @@ h3 {
   gap: 14px;
 }
 
+.mission-card {
+  position: relative;
+  display: flex;
+  min-height: 330px;
+  min-width: 0;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 18px;
+  background: rgba(12, 25, 20, 0.64);
+  backdrop-filter: blur(12px);
+}
+
+.mission-card:hover {
+  border-color: var(--line-strong);
+  background: rgba(18, 34, 27, 0.82);
+}
+
+.mission-card-topline {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 9px;
+  text-transform: uppercase;
+}
+
+.mission-card-topline span {
+  color: var(--muted);
+}
+
+.mission-card-topline strong {
+  color: var(--yellow);
+}
+
+.mission-index {
+  position: absolute;
+  right: 12px;
+  top: 30px;
+  color: rgba(237, 247, 240, 0.055);
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 90px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.mission-module {
+  position: relative;
+  z-index: 1;
+  margin: 44px 0 8px;
+  color: var(--red);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.mission-card h2 {
+  position: relative;
+  z-index: 1;
+  max-width: 90%;
+  font-size: 22px;
+  line-height: 1.12;
+}
+
+.mission-card > p:not(.mission-module) {
+  position: relative;
+  z-index: 1;
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.mission-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: auto;
+  padding-top: 24px;
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.mission-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mission-meta svg {
+  width: 13px;
+  height: 13px;
+  color: var(--cyan);
+}
+
+.mission-open {
+  display: flex;
+  min-height: 42px;
+  align-items: center;
+  justify-content: space-between;
+  border: 0;
+  border-top: 1px solid var(--line);
+  margin: 15px -18px -18px;
+  padding: 0 18px;
+  background: rgba(3, 8, 6, 0.35);
+  color: var(--green);
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.mission-open:hover {
+  background: rgba(156, 255, 87, 0.08);
+}
+
+.mission-open svg {
+  width: 16px;
+}
+
+.next-mission {
+  display: flex;
+  min-height: 146px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  margin-top: 18px;
+  padding: 20px 2px;
+}
+
+.next-mission span {
+  color: var(--red);
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.next-mission h3 {
+  margin-top: 8px;
+  font-size: 20px;
+}
+
+.next-mission p {
+  margin: 7px 0 0;
+  color: var(--muted);
+  font-size: 11px;
+}
+
 .lab-layout {
   display: grid;
   min-height: 560px;
@@ -790,6 +940,98 @@ h3 {
 
 .mission-modal {
   width: min(900px, calc(100% - 28px));
+}
+
+.mission-shell {
+  max-height: calc(100vh - 30px);
+  overflow-y: auto;
+}
+
+.mission-shell .modal-header h2 {
+  font-size: clamp(28px, 5vw, 46px);
+}
+
+.mission-lead {
+  max-width: 700px;
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.mission-brief {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 28px;
+  border-top: 1px solid var(--line);
+  padding-top: 20px;
+}
+
+.mission-brief h3 {
+  font-size: 15px;
+}
+
+.mission-brief p,
+.mission-brief li {
+  color: #b5c6bb;
+  font-size: 12px;
+  line-height: 1.65;
+}
+
+.mission-brief p {
+  margin: 9px 0 0;
+}
+
+.mission-brief ul {
+  margin: 9px 0 0;
+  padding-left: 18px;
+}
+
+.starter-preview {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--bg-deep);
+}
+
+.code-titlebar {
+  display: flex;
+  min-height: 39px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border-bottom: 1px solid var(--line);
+  padding: 0 12px;
+  color: var(--muted);
+  font-size: 9px;
+}
+
+.starter-preview pre {
+  max-height: 260px;
+  overflow: auto;
+  margin: 0;
+  padding: 16px;
+  color: #caffd8;
+  font-size: 12px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.mission-dialog-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.hint-box {
+  border-left: 2px solid var(--yellow);
+  margin: 0;
+  padding: 10px 12px;
+  background: rgba(244, 201, 93, 0.08);
+  color: #f7dda0;
+  font-size: 11px;
+  line-height: 1.55;
 }
 
 .toast-region {
@@ -955,6 +1197,10 @@ h3 {
   .mission-grid {
     grid-template-columns: 1fr;
   }
+
+  .mission-brief {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -967,4 +1213,3 @@ h3 {
     animation-iteration-count: 1 !important;
   }
 }
-

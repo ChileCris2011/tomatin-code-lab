@@ -109,3 +109,6 @@ export function getAllProgress() {
   return readDatabase();
 }
 
+export function resetAllProgress() {
+  localStorage.removeItem(PROGRESS_KEY);
+}

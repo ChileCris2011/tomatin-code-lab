@@ -663,6 +663,14 @@ h3 {
   content: "";
 }
 
+.mission-card.is-disabled {
+  opacity: 0.56;
+}
+
+.mission-card.is-disabled .mission-open {
+  cursor: not-allowed;
+}
+
 .mission-card-topline {
   position: relative;
   z-index: 1;
@@ -886,6 +894,206 @@ h3 {
   min-height: 240px;
   border-top: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
+}
+
+.ranking-note {
+  margin: 0;
+  border-bottom: 1px solid var(--line);
+  padding: 14px 4px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.table-scroll {
+  overflow-x: auto;
+}
+
+.table-shell table {
+  width: 100%;
+  min-width: 650px;
+  border-collapse: collapse;
+}
+
+.table-shell th,
+.table-shell td {
+  border-bottom: 1px solid var(--line);
+  padding: 15px 12px;
+  text-align: left;
+}
+
+.table-shell th {
+  color: var(--muted);
+  font-size: 9px;
+  text-transform: uppercase;
+}
+
+.table-shell td {
+  font-size: 12px;
+}
+
+.table-shell td strong,
+.table-shell td small {
+  display: block;
+}
+
+.table-shell td small {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 9px;
+}
+
+.table-shell tr.is-current {
+  background: rgba(156, 255, 87, 0.07);
+}
+
+.rank-position {
+  width: 58px;
+  color: var(--muted);
+}
+
+.rank-xp {
+  color: var(--yellow);
+  font-weight: 700;
+}
+
+.admin-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.admin-stats article {
+  padding: 22px 18px;
+}
+
+.admin-stats article + article {
+  border-left: 1px solid var(--line);
+}
+
+.admin-stats span,
+.admin-stats strong {
+  display: block;
+}
+
+.admin-stats span {
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.admin-stats strong {
+  margin-top: 8px;
+  color: var(--green);
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 30px;
+}
+
+.admin-section {
+  margin-top: 42px;
+}
+
+.admin-section h2 {
+  font-size: 22px;
+}
+
+.admin-mission-list {
+  margin-top: 18px;
+  border-top: 1px solid var(--line);
+}
+
+.admin-mission-row {
+  display: grid;
+  min-height: 68px;
+  align-items: center;
+  grid-template-columns: minmax(0, 1fr) 110px 90px;
+  gap: 18px;
+  border-bottom: 1px solid var(--line);
+  padding: 9px 4px;
+}
+
+.admin-mission-row > div strong,
+.admin-mission-row > div span {
+  display: block;
+}
+
+.admin-mission-row > div strong {
+  font-size: 12px;
+}
+
+.admin-mission-row > div span,
+.admin-mission-row label > span {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 9px;
+}
+
+.admin-mission-row label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.admin-mission-row input[type="number"] {
+  width: 72px;
+  height: 34px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 0 8px;
+  background: var(--bg-deep);
+  color: var(--text);
+}
+
+.switch-label input {
+  width: 17px;
+  height: 17px;
+  accent-color: var(--green);
+}
+
+.danger-zone {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 22px;
+  border-top: 1px solid rgba(255, 91, 87, 0.35);
+  padding-top: 22px;
+}
+
+.danger-zone p:last-child {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.admin-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 9px;
+}
+
+.danger-button {
+  display: inline-flex;
+  min-height: 42px;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  border: 1px solid var(--red);
+  border-radius: var(--radius);
+  padding: 0 14px;
+  background: rgba(255, 91, 87, 0.08);
+  color: #ff8e8b;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.danger-button:hover {
+  background: rgba(255, 91, 87, 0.16);
+}
+
+.danger-button svg {
+  width: 17px;
 }
 
 .modal {
@@ -1146,6 +1354,19 @@ h3 {
   .console-pane {
     min-height: 280px;
   }
+
+  .admin-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-stats article:nth-child(3) {
+    border-top: 1px solid var(--line);
+    border-left: 0;
+  }
+
+  .admin-stats article:nth-child(4) {
+    border-top: 1px solid var(--line);
+  }
 }
 
 @media (max-width: 720px) {
@@ -1261,6 +1482,23 @@ h3 {
 
   .mission-brief {
     grid-template-columns: 1fr;
+  }
+
+  .admin-mission-row {
+    grid-template-columns: minmax(0, 1fr) 96px;
+  }
+
+  .admin-mission-row .switch-label {
+    grid-column: 1 / -1;
+  }
+
+  .danger-zone {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .admin-actions {
+    justify-content: flex-start;
   }
 }
 

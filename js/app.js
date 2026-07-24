@@ -1,5 +1,13 @@
 import { getMissionById, getMissionsByCourse, missions } from "./missions.js";
 import { runCode } from "./runner.js";
+import {
+  ensureDemoAccounts,
+  getSession,
+  login,
+  logout,
+  register,
+} from "./auth.js";
+import { completeMission, getProgress, getRank } from "./store.js";
 
 const viewLabels = {
   dashboard: "base",
@@ -17,6 +25,12 @@ const missionContent = document.querySelector("#mission-content");
 const codeEditor = document.querySelector("#code-editor");
 const consoleOutput = document.querySelector("#console-output");
 const runButton = document.querySelector("#run-code");
+const authDialog = document.querySelector("#auth-dialog");
+const authForm = document.querySelector("#auth-form");
+const authFields = document.querySelector("#auth-fields");
+const sessionPanel = document.querySelector("#session-panel");
+let currentSession = getSession();
+let authMode = "login";
 
 function refreshIcons() {
   if (window.lucide) {
@@ -44,14 +58,15 @@ function showView(name) {
 
 function renderMissionGrid(course = "all") {
   const visibleMissions = getMissionsByCourse(course);
+  const completed = new Set(getProgress(currentSession?.userId).completed);
 
   missionGrid.innerHTML = visibleMissions
     .map(
       (mission) => `
-        <article class="mission-card">
+        <article class="mission-card ${completed.has(mission.id) ? "is-complete" : ""}">
           <div class="mission-card-topline">
             <span>${mission.courseLabel}</span>
-            <strong>+${mission.points} XP</strong>
+            <strong>${completed.has(mission.id) ? "COMPLETA" : `+${mission.points} XP`}</strong>
           </div>
           <div class="mission-index" aria-hidden="true">${String(mission.order).padStart(2, "0")}</div>
           <p class="mission-module">${mission.module}</p>
@@ -62,7 +77,7 @@ function renderMissionGrid(course = "all") {
             <span><i data-lucide="clock-3" aria-hidden="true"></i>${mission.duration} min</span>
           </div>
           <button class="mission-open" type="button" data-mission-open="${mission.id}">
-            Ver briefing
+            ${completed.has(mission.id) ? "Repetir mision" : "Ver briefing"}
             <i data-lucide="arrow-up-right" aria-hidden="true"></i>
           </button>
         </article>
@@ -74,7 +89,8 @@ function renderMissionGrid(course = "all") {
 }
 
 function renderNextMission() {
-  const mission = missions[0];
+  const completed = new Set(getProgress(currentSession?.userId).completed);
+  const mission = missions.find((item) => !completed.has(item.id)) ?? missions[0];
   const target = document.querySelector("#next-mission");
 
   target.className = "next-mission";
@@ -95,7 +111,8 @@ function renderNextMission() {
     </button>
   `;
 
-  document.querySelector("#completed-count").textContent = `0/${missions.length}`;
+  document.querySelector("#completed-count").textContent =
+    `${completed.size}/${missions.length}`;
   refreshIcons();
 }
 
@@ -200,6 +217,80 @@ async function executeLabCode() {
   runButton.disabled = false;
 }
 
+function showToast(message) {
+  const toast = document.createElement("div");
+  toast.className = "toast";
+  toast.textContent = message;
+  document.querySelector("#toast-region").append(toast);
+  window.setTimeout(() => toast.remove(), 4200);
+}
+
+function renderAccount() {
+  const progress = getProgress(currentSession?.userId);
+  const percentage = Math.round((progress.completed.length / missions.length) * 100);
+  const profileName = document.querySelector("#profile-name");
+  const profileRole = document.querySelector("#profile-role");
+  const avatar = document.querySelector(".avatar");
+
+  profileName.textContent = currentSession?.name ?? "Invitado";
+  profileRole.textContent = currentSession?.role ?? "sin sesion";
+  avatar.textContent = (currentSession?.name ?? "?").slice(0, 1).toUpperCase();
+  document.querySelector("#xp-total").textContent = progress.xp;
+  document.querySelector("#streak-count").textContent = progress.streak;
+  document.querySelector("#rank-label").textContent = getRank(progress.xp);
+  document.querySelector("#completed-count").textContent =
+    `${progress.completed.length}/${missions.length}`;
+  document.querySelector(".hero-signal small").textContent =
+    `${percentage}% sincronizado`;
+  document.querySelectorAll(".admin-only").forEach((item) => {
+    item.hidden = currentSession?.role !== "admin";
+  });
+
+  renderMissionGrid(
+    document.querySelector("[data-course-filter].is-active")?.dataset.courseFilter ??
+      "all",
+  );
+  renderNextMission();
+}
+
+function setAuthMode(mode) {
+  authMode = mode;
+  const isRegister = mode === "register";
+
+  document.querySelectorAll("[data-auth-mode]").forEach((tab) => {
+    tab.classList.toggle("is-active", tab.dataset.authMode === mode);
+  });
+  document.querySelector("#name-field").hidden = !isRegister;
+  document.querySelector("#auth-name").required = isRegister;
+  document.querySelector("#auth-password").autocomplete = isRegister
+    ? "new-password"
+    : "current-password";
+  document.querySelector("#auth-submit-label").textContent = isRegister
+    ? "Crear cuenta"
+    : "Conectar";
+  document.querySelector("#auth-error").textContent = "";
+}
+
+function openAccountDialog() {
+  const hasSession = Boolean(currentSession);
+  authFields.hidden = hasSession;
+  sessionPanel.hidden = !hasSession;
+
+  if (hasSession) {
+    document.querySelector("#session-avatar").textContent =
+      currentSession.name.slice(0, 1).toUpperCase();
+    document.querySelector("#session-name").textContent = currentSession.name;
+    document.querySelector("#session-email").textContent = currentSession.email;
+    document.querySelector("#session-role").textContent = currentSession.role;
+  } else {
+    authForm.reset();
+    setAuthMode("login");
+  }
+
+  authDialog.showModal();
+  refreshIcons();
+}
+
 document.querySelectorAll("[data-view-target]").forEach((trigger) => {
   trigger.addEventListener("click", () => showView(trigger.dataset.viewTarget));
 });
@@ -211,6 +302,66 @@ document.querySelector("#mobile-menu").addEventListener("click", () => {
 runButton.addEventListener("click", executeLabCode);
 document.querySelector("#clear-console").addEventListener("click", () => {
   consoleOutput.textContent = "$ consola limpia";
+});
+
+document.querySelector("#auth-trigger").addEventListener("click", openAccountDialog);
+document.querySelector("#auth-close").addEventListener("click", () => {
+  authDialog.close();
+});
+
+document.querySelector(".auth-tabs").addEventListener("click", (event) => {
+  const tab = event.target.closest("[data-auth-mode]");
+  if (tab) setAuthMode(tab.dataset.authMode);
+});
+
+authForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const email = document.querySelector("#auth-email").value;
+  const password = document.querySelector("#auth-password").value;
+  const error = document.querySelector("#auth-error");
+  error.textContent = "";
+
+  try {
+    currentSession =
+      authMode === "register"
+        ? await register({
+            email,
+            password,
+            name: document.querySelector("#auth-name").value,
+          })
+        : await login(email, password);
+    authDialog.close();
+    renderAccount();
+    showToast(`Sesion conectada: ${currentSession.name}`);
+  } catch (authError) {
+    error.textContent = authError.message;
+  }
+});
+
+document.querySelector("#logout-button").addEventListener("click", () => {
+  logout();
+  currentSession = null;
+  authDialog.close();
+  if (document.querySelector("#admin-view").classList.contains("is-active")) {
+    showView("dashboard");
+  }
+  renderAccount();
+  showToast("Sesion cerrada.");
+});
+
+document.addEventListener("mission:passed", ({ detail: { mission } }) => {
+  if (!currentSession) {
+    showToast("Mision superada. Inicia sesion para guardar el puntaje.");
+    return;
+  }
+
+  const result = completeMission(currentSession.userId, mission);
+  renderAccount();
+  showToast(
+    result.alreadyCompleted
+      ? "Mision repetida: el XP ya estaba registrado."
+      : `Mision completada: +${result.awarded} XP`,
+  );
 });
 
 document.querySelector(".filter-bar").addEventListener("click", (event) => {
@@ -264,9 +415,11 @@ document.addEventListener("click", (event) => {
   }
 });
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
+  await ensureDemoAccounts();
   renderMissionGrid();
   renderNextMission();
+  renderAccount();
   refreshIcons();
 });
 window.addEventListener("load", refreshIcons);

@@ -273,47 +273,61 @@ console.log(saludo);</textarea>
           </div>
           <button
             class="icon-button"
-            value="cancel"
-            formnovalidate
+            id="auth-close"
+            type="button"
             aria-label="Cerrar"
             title="Cerrar"
           >
             <i data-lucide="x" aria-hidden="true"></i>
           </button>
         </header>
-        <div class="auth-tabs" role="tablist" aria-label="Tipo de acceso">
-          <button class="segment is-active" type="button" data-auth-mode="login">
-            Ingresar
-          </button>
-          <button class="segment" type="button" data-auth-mode="register">
-            Crear usuario
+        <div id="auth-fields">
+          <div class="auth-tabs" role="tablist" aria-label="Tipo de acceso">
+            <button class="segment is-active" type="button" data-auth-mode="login">
+              Ingresar
+            </button>
+            <button class="segment" type="button" data-auth-mode="register">
+              Crear usuario
+            </button>
+          </div>
+          <label>
+            <span>Correo</span>
+            <input id="auth-email" type="email" autocomplete="email" required />
+          </label>
+          <label id="name-field" hidden>
+            <span>Alias</span>
+            <input id="auth-name" type="text" maxlength="24" autocomplete="nickname" />
+          </label>
+          <label>
+            <span>Clave</span>
+            <input
+              id="auth-password"
+              type="password"
+              minlength="6"
+              autocomplete="current-password"
+              required
+            />
+          </label>
+          <p class="form-note" id="auth-note">
+            Estudiante: demo@tomatin.local / tomatin123<br />
+            Admin: admin@tomatin.local / mustakis42
+          </p>
+          <p class="form-error" id="auth-error" aria-live="polite"></p>
+          <button class="primary-button full-width" value="default" type="submit">
+            <i data-lucide="log-in" aria-hidden="true"></i>
+            <span id="auth-submit-label">Conectar</span>
           </button>
         </div>
-        <label>
-          <span>Correo</span>
-          <input id="auth-email" type="email" autocomplete="email" required />
-        </label>
-        <label id="name-field" hidden>
-          <span>Alias</span>
-          <input id="auth-name" type="text" maxlength="24" autocomplete="nickname" />
-        </label>
-        <label>
-          <span>Clave</span>
-          <input
-            id="auth-password"
-            type="password"
-            minlength="6"
-            autocomplete="current-password"
-            required
-          />
-        </label>
-        <p class="form-note" id="auth-note">
-          Demo local: los datos quedan solo en este navegador.
-        </p>
-        <button class="primary-button full-width" value="default" type="submit">
-          <i data-lucide="log-in" aria-hidden="true"></i>
-          Conectar
-        </button>
+        <div class="session-panel" id="session-panel" hidden>
+          <span class="session-avatar" id="session-avatar" aria-hidden="true">T</span>
+          <strong id="session-name">Tomatin</strong>
+          <span id="session-email">demo@tomatin.local</span>
+          <small id="session-role">student</small>
+          <button class="secondary-button full-width" id="logout-button" type="button">
+            <i data-lucide="log-out" aria-hidden="true"></i>
+            Cerrar sesion
+          </button>
+        </div>
       </form>
     </dialog>
 
@@ -324,4 +338,3 @@ console.log(saludo);</textarea>
     <div class="toast-region" id="toast-region" aria-live="polite"></div>
   </body>
 </html>
-

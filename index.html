@@ -8,7 +8,11 @@
       content="Tomatin Code Lab: misiones originales de Programacion I y II con humor chileno."
     />
     <meta name="theme-color" content="#07100d" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Tomatin Code Lab" />
     <title>Tomatin Code Lab</title>
+    <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml" />
+    <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -36,7 +40,11 @@
         </button>
 
         <nav class="primary-nav">
-          <button class="nav-item is-active" data-view-target="dashboard">
+          <button
+            class="nav-item is-active"
+            data-view-target="dashboard"
+            aria-current="page"
+          >
             <i data-lucide="layout-dashboard" aria-hidden="true"></i>
             <span>Base</span>
           </button>
@@ -194,9 +202,27 @@
                 <p>De variables a grafos, sin saltarse los porques.</p>
               </div>
               <div class="filter-bar" role="group" aria-label="Filtrar misiones">
-                <button class="segment is-active" data-course-filter="all">Todas</button>
-                <button class="segment" data-course-filter="programacion-1">Prog I</button>
-                <button class="segment" data-course-filter="programacion-2">Prog II</button>
+                <button
+                  class="segment is-active"
+                  data-course-filter="all"
+                  aria-pressed="true"
+                >
+                  Todas
+                </button>
+                <button
+                  class="segment"
+                  data-course-filter="programacion-1"
+                  aria-pressed="false"
+                >
+                  Prog I
+                </button>
+                <button
+                  class="segment"
+                  data-course-filter="programacion-2"
+                  aria-pressed="false"
+                >
+                  Prog II
+                </button>
               </div>
             </header>
             <div class="mission-grid" id="mission-grid"></div>
@@ -235,6 +261,17 @@ console.log(saludo);</textarea>
                   </button>
                 </div>
                 <pre id="console-output" aria-live="polite">$ esperando ejecucion...</pre>
+                <label class="terminal-command">
+                  <span aria-hidden="true">$</span>
+                  <input
+                    id="terminal-input"
+                    type="text"
+                    autocomplete="off"
+                    spellcheck="false"
+                    aria-label="Comando de terminal"
+                    placeholder="escribe help y presiona Enter"
+                  />
+                </label>
               </section>
             </div>
           </section>

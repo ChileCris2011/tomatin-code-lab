@@ -1,0 +1,26 @@
+{
+  "name": "Tomatin Code Lab",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:1-22-bookworm",
+  "features": {
+    "ghcr.io/devcontainers/features/pnpm:1": {
+      "version": "11"
+    }
+  },
+  "postCreateCommand": "pnpm install --frozen-lockfile",
+  "forwardPorts": [5173],
+  "portsAttributes": {
+    "5173": {
+      "label": "Tomatin Code Lab",
+      "onAutoForward": "openPreview"
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "bradlc.vscode-tailwindcss"
+      ]
+    }
+  }
+}

@@ -70,6 +70,7 @@ const MIN_RESULTS_WIDTH = 290;
 const MIN_EDITOR_WIDTH = 420;
 const RESIZER_WIDTH = 7;
 const DEFAULT_RESULTS_WIDTH = 320;
+let cppIncludeFoldingRegistered = false;
 
 function readResultsWidth() {
   const stored = Number(window.localStorage.getItem(RESULTS_WIDTH_KEY));
@@ -88,6 +89,44 @@ function executionFingerprint(
 }
 
 const configureMonaco: BeforeMount = (monaco) => {
+  if (!cppIncludeFoldingRegistered) {
+    monaco.languages.registerFoldingRangeProvider("cpp", {
+      provideFoldingRanges(model) {
+        let includeStart = 0;
+        let includeEnd = 0;
+
+        for (let lineNumber = 1; lineNumber <= model.getLineCount(); lineNumber += 1) {
+          const line = model.getLineContent(lineNumber);
+
+          if (/^\s*#include\b/.test(line)) {
+            includeStart ||= lineNumber;
+            includeEnd = lineNumber;
+            continue;
+          }
+
+          if (includeStart && line.trim() === "") {
+            break;
+          }
+
+          if (line.trim() !== "") {
+            break;
+          }
+        }
+
+        return includeStart && includeEnd > includeStart
+          ? [
+              {
+                start: includeStart,
+                end: includeEnd,
+                kind: monaco.languages.FoldingRangeKind.Imports,
+              },
+            ]
+          : [];
+      },
+    });
+    cppIncludeFoldingRegistered = true;
+  }
+
   monaco.editor.defineTheme("tomatin-terminal", {
     base: "vs-dark",
     inherit: true,
@@ -1216,6 +1255,9 @@ export function Component() {
                   tabSize: language === "python" ? 4 : 2,
                   wordWrap: "off",
                   scrollBeyondLastColumn: 5,
+                  folding: true,
+                  foldingImportsByDefault: language === "cpp",
+                  showFoldingControls: "always",
                   scrollbar: {
                     horizontal: "auto",
                     vertical: "auto",

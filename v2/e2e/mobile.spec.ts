@@ -5,6 +5,12 @@ test("mobile navigation and workspace remain inside the viewport", async ({
 }) => {
   await page.goto("./");
   await page.getByRole("button", { name: "Entrar como estudiante" }).click();
+  await expect(
+    page.getByRole("heading", { name: "Tienes 3 tareas pendientes" }),
+  ).toBeVisible();
+  expect(
+    await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
+  ).toBe(true);
   await page.getByRole("button", { name: "Abrir navegación" }).click();
   await page.getByRole("link", { name: "Misiones" }).click();
 
@@ -12,10 +18,12 @@ test("mobile navigation and workspace remain inside the viewport", async ({
     await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
   ).toBe(true);
 
-  await page
-    .locator('.mission-card:has(h2:text-is("La once de Tomatin"))')
-    .getByRole("link", { name: "Abrir workspace" })
-    .click();
+  const firstTask = page.locator(".mission-card.is-assigned").first();
+  await expect(firstTask).toContainText("Variables y acumuladores");
+  await firstTask.getByRole("link", { name: "Trabajar en la tarea" }).click();
+  await expect(page.locator(".assignment-note-priority")).toContainText(
+    "Variables y acumuladores",
+  );
   await page.getByRole("tab", { name: "Pistas" }).click();
   await expect(page.getByRole("heading", { name: "Pistas progresivas" })).toBeVisible();
   await page.getByRole("tab", { name: "Misión" }).click();

@@ -1251,6 +1251,168 @@ fieldset legend {
   padding: 18px;
 }
 
+.student-work-alert {
+  display: grid;
+  min-height: 112px;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 22px;
+  padding: 18px 20px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  grid-template-columns: 48px minmax(0, 1fr) auto;
+  background: var(--panel);
+  box-shadow: var(--shadow);
+}
+
+.student-work-alert.has-pending {
+  border-color: rgba(244, 201, 107, 0.45);
+  background: rgba(244, 201, 107, 0.055);
+  animation: pending-alert 2.2s ease-in-out 2;
+}
+
+.student-work-alert.all-clear {
+  border-color: rgba(101, 201, 232, 0.32);
+  background: rgba(101, 201, 232, 0.045);
+}
+
+.student-work-alert-icon {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  color: var(--yellow);
+  background: rgba(244, 201, 107, 0.08);
+}
+
+.student-work-alert.all-clear .student-work-alert-icon {
+  color: var(--cyan);
+  background: rgba(101, 201, 232, 0.08);
+}
+
+.student-work-alert-icon svg {
+  width: 23px;
+}
+
+.student-work-alert.has-pending .student-work-alert-icon svg {
+  animation: pending-bell 900ms ease-in-out 3;
+}
+
+.student-work-alert h2 {
+  margin: 2px 0 4px;
+  font-size: 20px;
+}
+
+.student-work-alert p:last-child {
+  margin: 0;
+  color: var(--muted-strong);
+  font-size: 11px;
+}
+
+@keyframes pending-alert {
+  50% {
+    border-color: rgba(244, 201, 107, 0.8);
+    box-shadow: 0 0 0 3px rgba(244, 201, 107, 0.08);
+  }
+}
+
+@keyframes pending-bell {
+  25% {
+    transform: rotate(10deg);
+  }
+
+  75% {
+    transform: rotate(-10deg);
+  }
+}
+
+.task-groups {
+  display: grid;
+  gap: 10px;
+}
+
+.task-group {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.012);
+}
+
+.task-group > summary {
+  display: flex;
+  min-height: 48px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 13px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.task-group > summary::-webkit-details-marker {
+  display: none;
+}
+
+.task-group > summary > span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.task-group > summary strong {
+  font-size: 12px;
+}
+
+.task-group > summary small {
+  display: grid;
+  min-width: 21px;
+  height: 21px;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--panel-solid);
+  background: var(--yellow);
+  font-size: 8px;
+  font-weight: 800;
+}
+
+.task-group.approved > summary small {
+  background: var(--green);
+}
+
+.task-group > summary > svg {
+  width: 16px;
+  color: var(--muted);
+  transition: transform 150ms ease;
+}
+
+.task-group[open] > summary > svg {
+  transform: rotate(180deg);
+}
+
+.task-group .assignment-list {
+  border-top: 1px solid var(--line);
+  padding: 0 10px;
+}
+
+.task-group .assignment-main small {
+  display: -webkit-box;
+  overflow: hidden;
+  line-height: 1.45;
+  white-space: normal;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.task-group-empty {
+  margin: 0;
+  padding: 14px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 10px;
+}
+
 .assignment-list {
   border-top: 1px solid var(--line);
 }
@@ -1329,6 +1491,12 @@ fieldset legend {
   font-size: 9px;
 }
 
+.assignment-due.is-overdue,
+.assignment-due.is-overdue svg,
+.assignment-due.is-overdue small {
+  color: var(--red);
+}
+
 .submission-count {
   color: var(--yellow);
   font-size: 10px;
@@ -1404,11 +1572,28 @@ fieldset legend {
   display: flex;
   align-items: center;
   gap: 7px;
-  margin-bottom: 20px;
+  margin-bottom: 13px;
   color: var(--green);
   font-family: "SFMono-Regular", Consolas, monospace;
   font-size: 9px;
   font-weight: 800;
+}
+
+.next-task-due {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 13px;
+  padding: 8px 9px;
+  border: 1px solid rgba(244, 201, 107, 0.25);
+  border-radius: 4px;
+  color: var(--yellow);
+  background: rgba(244, 201, 107, 0.055);
+  font-size: 10px;
+}
+
+.next-task-due svg {
+  width: 15px;
 }
 
 .next-task-top svg {
@@ -1421,11 +1606,18 @@ fieldset legend {
 }
 
 .next-task > p {
-  min-height: 58px;
-  margin-bottom: 16px;
+  min-height: 48px;
+  margin-bottom: 9px;
   color: var(--muted);
   font-size: 12px;
   line-height: 1.55;
+}
+
+.next-task-mission {
+  display: block;
+  margin-bottom: 14px;
+  color: var(--cyan);
+  font-size: 8px;
 }
 
 .next-task-meta {
@@ -1694,7 +1886,16 @@ fieldset legend {
 
 .toggle-control input {
   position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
   opacity: 0;
+}
+
+.toggle-control input:focus-visible + span {
+  outline: 2px solid var(--cyan);
+  outline-offset: 2px;
 }
 
 .toggle-control > span {
@@ -1870,6 +2071,10 @@ fieldset legend {
   border-color: rgba(103, 232, 165, 0.35);
 }
 
+.mission-card.is-assigned {
+  border-color: rgba(244, 201, 107, 0.24);
+}
+
 .mission-card-top {
   display: flex;
   min-height: 48px;
@@ -1897,6 +2102,42 @@ fieldset legend {
   font-size: 9px;
   font-weight: 700;
   white-space: nowrap;
+}
+
+.mission-card-priority {
+  display: flex;
+  min-height: 58px;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(244, 201, 107, 0.2);
+  color: var(--yellow);
+  background: rgba(244, 201, 107, 0.055);
+}
+
+.mission-card-priority.is-overdue {
+  border-color: rgba(240, 127, 124, 0.3);
+  color: var(--red);
+  background: rgba(240, 127, 124, 0.055);
+}
+
+.mission-card-priority > svg {
+  width: 19px;
+  flex: 0 0 auto;
+}
+
+.mission-card-priority > span {
+  display: grid;
+  gap: 1px;
+}
+
+.mission-card-priority strong {
+  font-size: 11px;
+}
+
+.mission-card-priority small {
+  color: var(--muted-strong);
+  font-size: 8px;
 }
 
 .mission-card-body {
@@ -1929,6 +2170,25 @@ fieldset legend {
   line-height: 1.55;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
+}
+
+.mission-card.is-assigned .assignment-instructions {
+  min-height: 68px;
+  color: var(--muted-strong);
+  -webkit-line-clamp: 4;
+}
+
+.mission-base-label {
+  margin: -4px 0 12px;
+  padding-top: 9px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 8px;
+  line-height: 1.45;
+}
+
+.mission-base-label strong {
+  color: var(--cyan);
 }
 
 .mission-prerequisite {
@@ -3080,6 +3340,65 @@ fieldset legend {
   border: 1px solid rgba(244, 201, 107, 0.22);
   border-radius: 4px;
   background: rgba(244, 201, 107, 0.05);
+}
+
+.assignment-note-priority {
+  margin-bottom: 4px;
+  padding: 15px;
+  border-color: rgba(244, 201, 107, 0.48);
+  background: rgba(244, 201, 107, 0.07);
+}
+
+.assignment-note-priority.is-overdue {
+  border-color: rgba(240, 127, 124, 0.5);
+  background: rgba(240, 127, 124, 0.065);
+}
+
+.assignment-note-priority h2 {
+  margin: 4px 0 7px;
+  font-size: 17px;
+  line-height: 1.3;
+}
+
+.assignment-note-priority > p:not(.eyebrow) {
+  margin: 0 0 13px;
+  font-size: 11px;
+}
+
+.assignment-note-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 9px;
+  padding-top: 11px;
+  border-top: 1px solid rgba(244, 201, 107, 0.18);
+}
+
+.assignment-note-meta > span:first-child {
+  display: grid;
+  min-width: 0;
+  align-items: center;
+  gap: 2px 6px;
+  grid-template-columns: 15px minmax(0, 1fr);
+  color: var(--yellow);
+}
+
+.assignment-note-priority.is-overdue .assignment-note-meta > span:first-child {
+  color: var(--red);
+}
+
+.assignment-note-meta svg {
+  width: 14px;
+}
+
+.assignment-note-meta strong {
+  font-size: 10px;
+}
+
+.assignment-note-meta small {
+  grid-column: 2;
+  color: var(--muted-strong);
+  font-size: 8px;
 }
 
 .assignment-note strong {
@@ -5533,6 +5852,27 @@ fieldset legend {
     font-size: 18px;
   }
 
+  .student-work-alert {
+    min-height: 0;
+    gap: 12px;
+    padding: 15px;
+    grid-template-columns: 40px minmax(0, 1fr);
+  }
+
+  .student-work-alert-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .student-work-alert h2 {
+    font-size: 17px;
+  }
+
+  .student-work-alert .button {
+    width: 100%;
+    grid-column: 1 / -1;
+  }
+
   .assignment-row {
     gap: 9px;
     grid-template-columns: 34px minmax(0, 1fr) 36px;
@@ -5593,6 +5933,10 @@ fieldset legend {
 
   .mission-card {
     min-height: 330px;
+  }
+
+  .mission-card.is-assigned {
+    min-height: 390px;
   }
 
   .podium {
@@ -6008,6 +6352,15 @@ fieldset legend {
 
   .language-key span {
     flex: 1;
+  }
+
+  .task-group .assignment-list {
+    padding: 0 6px;
+  }
+
+  .assignment-note-meta {
+    align-items: flex-start;
+    flex-direction: column;
   }
 
   .workspace-title h1 {

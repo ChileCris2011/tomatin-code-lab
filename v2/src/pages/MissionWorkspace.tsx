@@ -43,7 +43,7 @@ import {
   loadDraft,
   saveDraft,
 } from "@/services/draft-store";
-import { runMissionCode } from "@/services/runner";
+import { runManualCode, runMissionCode } from "@/services/runner";
 import {
   runMissionAdmin,
   type MissionSolution,
@@ -56,6 +56,7 @@ import {
   type Attempt,
   type AttemptKind,
   type Language,
+  type ManualRunResult,
   type RunResult,
 } from "@/types";
 
@@ -64,6 +65,7 @@ const MonacoEditor = lazy(() => import("@monaco-editor/react"));
 type MobilePane = "brief" | "code" | "results";
 type BriefTab = "problem" | "hints" | "history" | "solution";
 type SaveState = "loading" | "saving" | "synced" | "local" | "error";
+type ManualRunState = "idle" | "running";
 
 const RESULTS_WIDTH_KEY = "tomatin.v3.workspace-results-width";
 const MIN_RESULTS_WIDTH = 290;
@@ -368,6 +370,10 @@ export function Component() {
   const [saveState, setSaveState] = useState<SaveState>("loading");
   const [saveMessage, setSaveMessage] = useState("");
   const [result, setResult] = useState<RunResult | null>(null);
+  const [manualOpen, setManualOpen] = useState(false);
+  const [manualExpression, setManualExpression] = useState("");
+  const [manualResult, setManualResult] = useState<ManualRunResult | null>(null);
+  const [manualRunning, setManualRunning] = useState<ManualRunState>("idle");
   const [running, setRunning] = useState<AttemptKind | null>(null);
   const [briefTab, setBriefTab] = useState<BriefTab>(
     linkedAttemptId || linkedReviewId ? "history" : "problem",
@@ -675,6 +681,10 @@ export function Component() {
       testCase.actualExpression ?? testCase.expression,
     ]),
   );
+  const manualSignatureHints = activeMission.variants[language].expectedSignature
+    .split("\n")
+    .map((entry) => entry.trim())
+    .filter(Boolean);
 
   async function execute(kind: AttemptKind) {
     if (
@@ -728,6 +738,19 @@ export function Component() {
       );
     }
     setRunning(null);
+  }
+
+  async function executeManualTest() {
+    if (language === "cpp" || manualRunning === "running") return;
+    setManualRunning("running");
+    setManualResult(null);
+    const manual = await runManualCode({
+      language,
+      code: currentCode,
+      expression: manualExpression,
+    });
+    setManualResult(manual);
+    setManualRunning("idle");
   }
 
   function clampResultsWidth(nextWidth: number) {
@@ -1281,6 +1304,23 @@ export function Component() {
             <button
               className="button secondary"
               type="button"
+              disabled={Boolean(running) || isStudentPreview || language === "cpp"}
+              title={
+                language === "cpp"
+                  ? "El probador manual está disponible solo para JavaScript y Python"
+                  : undefined
+              }
+              onClick={() => {
+                setManualOpen(true);
+                setManualResult(null);
+              }}
+            >
+              <TerminalSquare aria-hidden="true" />
+              Test Manual
+            </button>
+            <button
+              className="button secondary"
+              type="button"
               disabled={
                 Boolean(running) ||
                 isStudentPreview ||
@@ -1327,6 +1367,125 @@ export function Component() {
             </button>
           </div>
           </section>
+
+          {manualOpen ? (
+            <div className="manual-test-backdrop" role="presentation">
+              <section
+                className="manual-test-dialog"
+                aria-labelledby="manual-test-title"
+                role="dialog"
+                aria-modal="true"
+              >
+                <header>
+                  <div>
+                    <span className="eyebrow">PRUEBA MANUAL</span>
+                    <h2 id="manual-test-title">
+                      Ejecutar expresión en {LANGUAGE_META[language].label}
+                    </h2>
+                    <p className="manual-test-desc">
+                      Prueba aquí tus funciones con valores personalizados
+                    </p>
+                  </div>
+                  <button
+                    className="icon-button"
+                    type="button"
+                    aria-label="Cerrar prueba manual"
+                    title="Cerrar"
+                    onClick={() => setManualOpen(false)}
+                  >
+                    <X aria-hidden="true" />
+                  </button>
+                </header>
+                <label className="manual-test-field">
+                  <span>Expresión</span>
+                  <input
+                    type="text"
+                    value={manualExpression}
+                    placeholder={
+                      language === "python" ? "mi_funcion(42)" : "miFuncion(42)"
+                    }
+                    onChange={(event) => setManualExpression(event.target.value)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter") {
+                        event.preventDefault();
+                        void executeManualTest();
+                      }
+                    }}
+                    autoFocus
+                  />
+                </label>
+                {manualSignatureHints.length > 0 ? (
+                  <p className="manual-test-hint">
+                    Funciones evaluadas en este ejercicio:{" "}
+                    {manualSignatureHints.map((signature, index) => (
+                      <span key={signature}>
+                        {index > 0 ? ", " : ""}
+                        <code>{signature}</code>
+                      </span>
+                    ))}
+                  </p>
+                ) : null}
+                <div className="manual-test-actions">
+                  <button
+                    className="button secondary"
+                    type="button"
+                    onClick={() => setManualOpen(false)}
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    className="button primary"
+                    type="button"
+                    disabled={manualRunning === "running"}
+                    onClick={() => void executeManualTest()}
+                  >
+                    {manualRunning === "running" ? (
+                      <LoaderCircle className="spin" aria-hidden="true" />
+                    ) : (
+                      <Play aria-hidden="true" />
+                    )}
+                    Ejecutar expresión
+                  </button>
+                </div>
+                {manualResult ? (
+                  <section
+                    className={`manual-test-result result-${manualResult.status}`}
+                    aria-live="polite"
+                  >
+                    <strong>
+                      {manualResult.status === "passed"
+                        ? "Resultado"
+                        : "No se pudo ejecutar"}
+                    </strong>
+                    <dl>
+                      <div>
+                        <dt>Expresión</dt>
+                        <dd>
+                          <code>{manualResult.expression}</code>
+                        </dd>
+                      </div>
+                      {manualResult.value !== undefined ? (
+                        <div>
+                          <dt>Valor</dt>
+                          <dd>
+                            <code>{manualResult.value}</code>
+                          </dd>
+                        </div>
+                      ) : null}
+                    </dl>
+                    {manualResult.stdout || manualResult.stderr ? (
+                      <pre>
+                        {manualResult.stdout ? `$ ${manualResult.stdout}\n` : ""}
+                        {manualResult.stderr
+                          ? `[stderr]\n${manualResult.stderr}`
+                          : ""}
+                      </pre>
+                    ) : null}
+                  </section>
+                ) : null}
+              </section>
+            </div>
+          ) : null}
 
           <button
             className="workspace-resizer"

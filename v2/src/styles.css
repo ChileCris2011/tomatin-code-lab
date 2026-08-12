@@ -3442,6 +3442,138 @@ fieldset legend {
   font-size: 11px;
 }
 
+.manual-test-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgb(0 0 0 / 0.58);
+}
+
+.manual-test-dialog {
+  width: min(620px, 100%);
+  max-height: min(720px, calc(100vh - 40px));
+  overflow: auto;
+  border: 1px solid rgb(127 255 180 / 0.22);
+  border-radius: 8px;
+  background: #07100c;
+  box-shadow: 0 24px 80px rgb(0 0 0 / 0.42);
+}
+
+.manual-test-dialog header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 20px 12px;
+  border-bottom: 1px solid rgb(127 255 180 / 0.12);
+}
+
+.manual-test-dialog h2 {
+  margin: 4px 0 0;
+  font-size: 1.1rem;
+}
+
+.manual-test-field {
+  display: grid;
+  gap: 8px;
+  padding: 18px 20px 0;
+}
+
+.manual-test-field span {
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.manual-test-field input {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid rgb(127 255 180 / 0.18);
+  border-radius: 6px;
+  padding: 0 12px;
+  background: #0b1811;
+  color: var(--text);
+  font: 0.95rem "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+}
+
+.manual-test-hint {
+  margin: 10px 20px 0;
+  color: var(--muted);
+  font-size: 0.84rem;
+  line-height: 1.55;
+}
+
+.manual-test-hint code {
+  color: var(--text);
+}
+
+.manual-test-desc {
+  margin: 5px 0px 0;
+  color: var(--muted);
+  font-size: 0.84rem;
+  line-height: 1.55;
+}
+
+.manual-test-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 16px 20px 20px;
+}
+
+.manual-test-result {
+  margin: 0 20px 20px;
+  border: 1px solid rgb(127 255 180 / 0.14);
+  border-radius: 8px;
+  padding: 14px;
+  background: rgb(255 255 255 / 0.035);
+}
+
+.manual-test-result.result-runtime_error,
+.manual-test-result.result-timeout,
+.manual-test-result.result-failed {
+  border-color: rgb(248 113 113 / 0.28);
+  background: rgb(248 113 113 / 0.08);
+}
+
+.manual-test-result dl {
+  display: grid;
+  gap: 10px;
+  margin: 12px 0 0;
+}
+
+.manual-test-result dl > div {
+  display: grid;
+  gap: 4px;
+}
+
+.manual-test-result dt {
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.manual-test-result dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.manual-test-result pre {
+  max-height: 220px;
+  overflow: auto;
+  margin: 12px 0 0;
+  border-radius: 6px;
+  padding: 12px;
+  background: #030805;
+  color: var(--text);
+  white-space: pre-wrap;
+}
+
 .results-pane {
   display: flex;
   flex-direction: column;

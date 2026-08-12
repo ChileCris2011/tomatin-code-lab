@@ -1,11 +1,10 @@
 /// <reference lib="webworker" />
 
-import type { ManualRunResult, MissionTest, TestResult } from "@/types";
+import type { MissionTest, TestResult } from "@/types";
 
 interface WorkerRequest {
   code: string;
   tests: MissionTest[];
-  manualExpression?: string;
 }
 
 function serialize(value: unknown): string {
@@ -26,28 +25,6 @@ self.onmessage = ({ data }: MessageEvent<WorkerRequest>) => {
   };
 
   try {
-    if (data.manualExpression !== undefined) {
-      const execute = new Function(
-        "console",
-        "serializeValue",
-        `"use strict";
-${data.code}
-return serializeValue((${data.manualExpression}));`,
-      );
-      const result: ManualRunResult = {
-        id: crypto.randomUUID(),
-        status: "passed",
-        expression: data.manualExpression,
-        value: execute(consoleProxy, serialize) as string,
-        stdout: logs.join("\n").slice(0, 32_768),
-        stderr: "",
-        diagnostics: [],
-        createdAt: new Date().toISOString(),
-      };
-      self.postMessage({ ok: true, logs, tests: [], manual: result });
-      return;
-    }
-
     const checks = data.tests
       .map((entry) => {
         const actual = entry.actualExpression

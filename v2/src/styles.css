@@ -5346,6 +5346,10 @@ fieldset legend {
   .code-pane.mobile-visible {
     display: grid;
   }
+
+  .workspace-layout:has(> .brief-pane.mobile-visible) > .workbench-panes {
+    display: none;
+  }
 }
 
 @media (max-width: 760px) {

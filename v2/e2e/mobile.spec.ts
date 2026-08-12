@@ -16,6 +16,15 @@ test("mobile navigation and workspace remain inside the viewport", async ({
     .locator('.mission-card:has(h2:text-is("La once de Tomatin"))')
     .getByRole("link", { name: "Abrir workspace" })
     .click();
+  await page.getByRole("tab", { name: "Pistas" }).click();
+  await expect(page.getByRole("heading", { name: "Pistas progresivas" })).toBeVisible();
+  await page.getByRole("tab", { name: "Misión" }).click();
+  await page.locator(".brief-scroll").evaluate((element) => {
+    element.scrollTop = element.scrollHeight;
+  });
+  await expect
+    .poll(() => page.locator(".brief-scroll").evaluate((element) => element.scrollTop))
+    .toBeGreaterThan(0);
   await page.getByRole("tab", { name: "Código" }).click();
   await expect(page.getByRole("button", { name: "Ejecutar" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Entregar" })).toBeVisible();

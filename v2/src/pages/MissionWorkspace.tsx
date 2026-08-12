@@ -37,7 +37,8 @@ import {
 } from "lucide-react";
 import { Link, Navigate, useParams, useSearchParams } from "react-router-dom";
 import type { BeforeMount, OnMount } from "@monaco-editor/react";
-import { formatDate, relativeDueDate } from "@/lib/format";
+import { StatusBadge } from "@/components/StatusBadge";
+import { formatDate, isOverdue, relativeDueDate } from "@/lib/format";
 import {
   createDraftKey,
   loadDraft,
@@ -348,6 +349,10 @@ export function Component() {
   const mission = slug ? getMissionBySlug(slug, missionVersion) : undefined;
   const validAssignment =
     assignment && assignment.missionId === mission?.id ? assignment : undefined;
+  const assignmentStatus = progress?.status ?? "not_started";
+  const assignmentOverdue = validAssignment
+    ? isOverdue(validAssignment.dueAt, assignmentStatus)
+    : false;
   const initialLanguage =
     progress?.language &&
     validAssignment?.allowedLanguages.includes(progress.language)
@@ -877,6 +882,31 @@ export function Component() {
           <div className="brief-scroll">
             {briefTab === "problem" ? (
               <>
+                {validAssignment ? (
+                  <section
+                    className={`assignment-note assignment-note-priority ${
+                      assignmentOverdue ? "is-overdue" : ""
+                    }`}
+                  >
+                    <p className="eyebrow">ENCARGO DEL MENTOR</p>
+                    <h2>{validAssignment.title}</h2>
+                    <p>
+                      {validAssignment.instructions ||
+                        "Completa esta misión y envíala antes del vencimiento."}
+                    </p>
+                    <div className="assignment-note-meta">
+                      <span>
+                        <Clock3 aria-hidden="true" />
+                        <strong>{relativeDueDate(validAssignment.dueAt)}</strong>
+                        <small>{formatDate(validAssignment.dueAt, true)}</small>
+                      </span>
+                      <StatusBadge
+                        status={assignmentStatus}
+                        overdue={assignmentOverdue}
+                      />
+                    </div>
+                  </section>
+                ) : null}
                 <section className="brief-section">
                   <p className="eyebrow">CONTEXTO</p>
                   <p>{mission.context}</p>
@@ -980,15 +1010,6 @@ export function Component() {
                   </span>
                   <span>{mission.difficulty}</span>
                 </section>
-                {validAssignment ? (
-                  <section className="assignment-note">
-                    <strong>{validAssignment.title}</strong>
-                    <p>{validAssignment.instructions}</p>
-                    <small>
-                      Entrega: {formatDate(validAssignment.dueAt, true)}
-                    </small>
-                  </section>
-                ) : null}
               </>
             ) : null}
 

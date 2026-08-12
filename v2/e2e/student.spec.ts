@@ -35,6 +35,69 @@ test("opens an assigned mission in two actions and runs visible tests", async ({
   await expect(page.getByRole("button", { name: "Entregar" })).toBeEnabled();
 });
 
+test("prioritizes pending tasks and shows the mentor brief before the mission", async ({
+  page,
+}) => {
+  await expect(
+    page.getByRole("heading", { name: "Tienes 3 tareas pendientes" }),
+  ).toBeVisible();
+  const pending = page.locator("details.task-group.pending");
+  const approved = page.locator("details.task-group.approved");
+  await expect(pending).toHaveAttribute("open", "");
+  await expect(pending.locator(".assignment-row").first()).toContainText(
+    "Variables y acumuladores",
+  );
+  await approved.locator("summary").click();
+  await expect(approved).toContainText("Condiciones booleanas");
+
+  await page.getByRole("link", { name: "Misiones" }).click();
+  const firstTask = page.locator(".mission-card.is-assigned").first();
+  await expect(firstTask).toContainText("Variables y acumuladores");
+  await expect(firstTask).toContainText(
+    "Resuelve la misión en cualquiera de los tres lenguajes.",
+  );
+  await expect(firstTask.locator(".mission-card-priority")).toContainText(
+    "Vence",
+  );
+  const catalogAccessibility = await new AxeBuilder({ page }).analyze();
+  expect(catalogAccessibility.violations).toEqual([]);
+  await firstTask.getByRole("link", { name: "Trabajar en la tarea" }).click();
+
+  const firstBriefBlock = page.locator(".brief-scroll > section").first();
+  await expect(firstBriefBlock).toHaveClass(/assignment-note-priority/);
+  await expect(firstBriefBlock).toContainText("Variables y acumuladores");
+  await expect(firstBriefBlock).toContainText(
+    "Resuelve la misión en cualquiera de los tres lenguajes.",
+  );
+  await expect(firstBriefBlock).toContainText("En revisión");
+});
+
+test("celebrates when the student has no pending work", async ({ page }) => {
+  await page.getByRole("link", { name: "Feedback" }).click();
+  await page
+    .getByRole("button", { name: /Eliminar feedback Comentario del mentor/ })
+    .click();
+  await page.evaluate(() => {
+    const key = "tomatin.v2.demo-classroom";
+    const stored = window.localStorage.getItem(key);
+    if (!stored) throw new Error("Demo snapshot was not persisted");
+    const snapshot = JSON.parse(stored) as {
+      progress: Array<{ userId: string; status: string }>;
+    };
+    snapshot.progress = snapshot.progress.map((entry) =>
+      entry.userId === "student-01"
+        ? { ...entry, status: "approved" }
+        : entry,
+    );
+    window.localStorage.setItem(key, JSON.stringify(snapshot));
+  });
+  await page.reload();
+  await page.getByRole("link", { name: "Tareas" }).click();
+
+  await expect(page.getByRole("heading", { name: "Estás al día" })).toBeVisible();
+  await expect(page.getByText("No tienes entregas pendientes. Buen trabajo.")).toBeVisible();
+});
+
 test("resizes results and keeps long editor lines on one line", async ({
   page,
 }) => {

@@ -1040,16 +1040,39 @@ export function ClassroomProvider({ children }: { children: ReactNode }) {
       if (previewStudentId || !snapshot) return;
       const dismissedAt = new Date().toISOString();
       if (supabase) {
+        const previousNotification = snapshot.notifications.find(
+          (entry) => entry.id === id,
+        );
+        setSnapshot((current) =>
+          current
+            ? {
+                ...current,
+                notifications: current.notifications.map((entry) =>
+                  entry.id === id ? { ...entry, dismissedAt } : entry,
+                ),
+              }
+            : current,
+        );
         void supabase
           .from("notifications")
           .update({ dismissed_at: dismissedAt })
           .eq("id", id)
           .then(({ error: notificationError }) => {
             if (notificationError) {
+              if (previousNotification) {
+                setSnapshot((current) =>
+                  current
+                    ? {
+                        ...current,
+                        notifications: current.notifications.map((entry) =>
+                          entry.id === id ? previousNotification : entry,
+                        ),
+                      }
+                    : current,
+                );
+              }
               setError(notificationError.message);
-              return;
             }
-            void refresh();
           });
         return;
       }
@@ -1060,7 +1083,7 @@ export function ClassroomProvider({ children }: { children: ReactNode }) {
         ),
       });
     },
-    [persistDemo, previewStudentId, refresh, snapshot],
+    [persistDemo, previewStudentId, snapshot],
   );
 
   const recordHint = useCallback(

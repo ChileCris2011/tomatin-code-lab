@@ -5,6 +5,7 @@ import type { MissionTest } from "@/types";
 interface WorkerRequest {
   code: string;
   tests: MissionTest[];
+  manualExpression?: string;
 }
 
 interface PyodideRuntime {
@@ -32,6 +33,8 @@ self.onmessage = async ({ data }: MessageEvent<WorkerRequest>) => {
     const runtime = await loadRuntime();
     runtime.globals.set("__tomatin_code", data.code);
     runtime.globals.set("__tomatin_tests_json", JSON.stringify(data.tests));
+    runtime.globals.set("__tomatin_manual_expression", data.manualExpression ?? "");
+    runtime.globals.set("__tomatin_manual_enabled", data.manualExpression !== undefined);
     const payload = await runtime.runPythonAsync(`
 import contextlib
 import io
@@ -42,33 +45,37 @@ _namespace = {}
 _stdout = io.StringIO()
 _resultados = []
 _error = None
+_manual = None
 
 try:
     with contextlib.redirect_stdout(_stdout), contextlib.redirect_stderr(_stdout):
         exec(__tomatin_code, _namespace)
-        for _prueba in json.loads(__tomatin_tests_json):
-            try:
-                _paso = bool(eval(_prueba["expression"], _namespace))
-                _actual = None
-                if _prueba.get("actualExpression"):
-                    _actual = repr(eval(_prueba["actualExpression"], _namespace))
-                _resultados.append({
-                    "id": _prueba["id"],
-                    "label": _prueba["label"],
-                    "passed": _paso,
-                    "expected": _prueba["expected"],
-                    "actual": _actual,
-                    "feedback": _prueba["feedback"],
-                })
-            except Exception as _test_error:
-                _resultados.append({
-                    "id": _prueba["id"],
-                    "label": _prueba["label"],
-                    "passed": False,
-                    "expected": _prueba["expected"],
-                    "actual": str(_test_error),
-                    "feedback": _prueba["feedback"],
-                })
+        if __tomatin_manual_enabled:
+            _manual = repr(eval(__tomatin_manual_expression, _namespace))
+        else:
+            for _prueba in json.loads(__tomatin_tests_json):
+                try:
+                    _paso = bool(eval(_prueba["expression"], _namespace))
+                    _actual = None
+                    if _prueba.get("actualExpression"):
+                        _actual = repr(eval(_prueba["actualExpression"], _namespace))
+                    _resultados.append({
+                        "id": _prueba["id"],
+                        "label": _prueba["label"],
+                        "passed": _paso,
+                        "expected": _prueba["expected"],
+                        "actual": _actual,
+                        "feedback": _prueba["feedback"],
+                    })
+                except Exception as _test_error:
+                    _resultados.append({
+                        "id": _prueba["id"],
+                        "label": _prueba["label"],
+                        "passed": False,
+                        "expected": _prueba["expected"],
+                        "actual": str(_test_error),
+                        "feedback": _prueba["feedback"],
+                    })
 except Exception:
     _error = traceback.format_exc()
 
@@ -76,6 +83,10 @@ json.dumps({
     "ok": _error is None,
     "logs": _stdout.getvalue().splitlines(),
     "tests": _resultados,
+    "manual": {
+        "expression": __tomatin_manual_expression,
+        "value": _manual,
+    } if __tomatin_manual_enabled and _error is None else None,
     "error": _error,
 })
 `);

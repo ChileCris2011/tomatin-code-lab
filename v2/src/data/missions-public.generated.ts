@@ -1046,7 +1046,7 @@ export const publicMissions = [
       "javascript": {
         "language": "javascript",
         "starterCode": "function stockSeguro(stock, retiro) {\n  const retiroInvalido = false; // TODO: valida ambos casos inválidos.\n  if (retiroInvalido) return -1;\n  return stock; // TODO: aplica el retiro.\n}\n\nfunction necesitaReposicion(stock, minimo) {\n  return false; // TODO: compara el stock con el mínimo.\n}\n\n// DATOS DE EJEMPLO (el evaluador usará también otros valores):\n// stockSeguro(12, 5)\n// Resultado esperado: 7\n",
-        "expectedSignature": "function stockSeguro(stock, retiro)",
+        "expectedSignature": "function stockSeguro(stock, retiro)\nfunction necesitaReposicion(stock, minimo)",
         "examples": [
           {
             "id": "stock-update",
@@ -1086,7 +1086,7 @@ export const publicMissions = [
       "python": {
         "language": "python",
         "starterCode": "def stock_seguro(stock, retiro):\n    retiro_invalido = False  # TODO: valida ambos casos inválidos.\n    if retiro_invalido:\n        return -1\n    return stock  # TODO: aplica el retiro.\n\ndef necesita_reposicion(stock, minimo):\n    return False  # TODO: compara el stock con el mínimo.\n\n# DATOS DE EJEMPLO (el evaluador usará también otros valores):\n# stock_seguro(12, 5)\n# Resultado esperado: 7\n",
-        "expectedSignature": "def stock_seguro(stock, retiro)",
+        "expectedSignature": "def stock_seguro(stock, retiro)\ndef necesita_reposicion(stock, minimo)",
         "examples": [
           {
             "id": "stock-update",
@@ -1126,7 +1126,7 @@ export const publicMissions = [
       "cpp": {
         "language": "cpp",
         "starterCode": "#include <algorithm>\n#include <cmath>\n#include <deque>\n#include <iostream>\n#include <memory>\n#include <numeric>\n#include <optional>\n#include <queue>\n#include <regex>\n#include <string>\n#include <unordered_map>\n#include <unordered_set>\n#include <utility>\n#include <vector>\nusing namespace std;\n\nint stockSeguro(int stock, int retiro) {\n  bool retiroInvalido = false;  // TODO: valida ambos casos inválidos.\n  if (retiroInvalido) return -1;\n  return stock;  // TODO: aplica el retiro.\n}\n\nbool necesitaReposicion(int stock, int minimo) {\n  return false;  // TODO: compara el stock con el mínimo.\n}\n\n// DATOS DE EJEMPLO (el evaluador usará también otros valores):\n// stockSeguro(12, 5) == 7\n// Resultado esperado: 7\n",
-        "expectedSignature": "int stockSeguro(int stock, int retiro)",
+        "expectedSignature": "int stockSeguro(int stock, int retiro)\nbool necesitaReposicion(int stock, int minimo)",
         "examples": [
           {
             "id": "stock-update",
@@ -2424,7 +2424,7 @@ export const publicMissions = [
       "python": {
         "language": "python",
         "starterCode": "class ListaEnlazada:\n    def __init__(self):\n        self.cabeza = None\n        self.largo = 0\n\n    def agregar(self, valor):\n        pass\n\n    def eliminar(self, valor):\n        pass\n\n    def contiene(self, valor):\n        pass\n\n# DATOS DE EJEMPLO (el evaluador usará también otros valores):\n# (lambda l: (l.agregar(3), l.agregar(5), l.contiene(5) and l.largo == 2)[-1])(ListaEnlazada())\n# Resultado esperado: True\n",
-        "expectedSignature": "def __init__(self)",
+        "expectedSignature": "def __init__(self)\ndef agregar(self, valor)\ndef eliminar(self, valor)\ndef contiene(self, valor)",
         "examples": [
           {
             "id": "list-add",
@@ -2588,7 +2588,7 @@ export const publicMissions = [
       "python": {
         "language": "python",
         "starterCode": "class Cola:\n    def __init__(self):\n        self.datos = []\n        self.inicio = 0\n\n    def encolar(self, valor):\n        pass\n\n    def desencolar(self):\n        pass\n\n    def frente(self):\n        pass\n\n    def esta_vacia(self):\n        pass\n\n# DATOS DE EJEMPLO (el evaluador usará también otros valores):\n# (lambda q: (q.encolar(4), q.encolar(8), q.desencolar() == 4 and q.frente() == 8)[-1])(Cola())\n# Resultado esperado: True\n",
-        "expectedSignature": "def __init__(self)",
+        "expectedSignature": "def __init__(self)\ndef encolar(self, valor)\ndef desencolar(self)\ndef frente(self)\ndef esta_vacia(self)",
         "examples": [
           {
             "id": "queue-order",
@@ -2752,7 +2752,7 @@ export const publicMissions = [
       "python": {
         "language": "python",
         "starterCode": "class ArbolBusqueda:\n    def __init__(self):\n        self.raiz = None\n\n    def insertar(self, valor):\n        pass\n\n    def contiene(self, valor):\n        pass\n\n# DATOS DE EJEMPLO (el evaluador usará también otros valores):\n# (lambda a: ([a.insertar(x) for x in [8, 3, 10, 6]], a.contiene(6) and not a.contiene(9))[-1])(ArbolBusqueda())\n# Resultado esperado: True\n",
-        "expectedSignature": "def __init__(self)",
+        "expectedSignature": "def __init__(self)\ndef insertar(self, valor)\ndef contiene(self, valor)",
         "examples": [
           {
             "id": "tree-find",

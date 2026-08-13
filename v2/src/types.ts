@@ -212,6 +212,18 @@ export interface RunResult {
   createdAt: string;
 }
 
+export interface ManualRunResult {
+  id: string;
+  status: Exclude<RunStatus, "queued" | "running">;
+  expression: string;
+  value?: string;
+  stdout: string;
+  stderr: string;
+  diagnostics: Diagnostic[];
+  durationMs?: number;
+  createdAt: string;
+}
+
 export type RepositorySyncStatus =
   | "synced"
   | "pending_setup"

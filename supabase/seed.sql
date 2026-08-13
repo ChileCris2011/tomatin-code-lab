@@ -1524,7 +1524,8 @@ function necesitaReposicion(stock, minimo) {
 // stockSeguro(12, 5)
 // Resultado esperado: 7
 ',
-  'function stockSeguro(stock, retiro)',
+  'function stockSeguro(stock, retiro)
+function necesitaReposicion(stock, minimo)',
   '[{"id":"stock-update","label":"Descuenta un retiro válido","input":"stockSeguro(12, 5)","output":"7","explanation":"Resta solo después de validar."},{"id":"stock-invalid","label":"Impide stock negativo","input":"stockSeguro(4, 8)","output":"-1","explanation":"Un retiro mayor al stock debe rechazarse."}]'::jsonb,
   '[{"id":"stock-update","label":"Descuenta un retiro válido","expression":"stockSeguro(12, 5) === 7","expected":"7","feedback":"Resta solo después de validar.","actualExpression":"stockSeguro(12, 5)"},{"id":"stock-invalid","label":"Impide stock negativo","expression":"stockSeguro(4, 8) === -1","expected":"-1","feedback":"Un retiro mayor al stock debe rechazarse.","actualExpression":"stockSeguro(4, 8)"}]'::jsonb,
   1
@@ -1589,7 +1590,8 @@ def necesita_reposicion(stock, minimo):
 # stock_seguro(12, 5)
 # Resultado esperado: 7
 ',
-  'def stock_seguro(stock, retiro)',
+  'def stock_seguro(stock, retiro)
+def necesita_reposicion(stock, minimo)',
   '[{"id":"stock-update","label":"Descuenta un retiro válido","input":"stock_seguro(12, 5)","output":"7","explanation":"Resta solo después de validar."},{"id":"stock-invalid","label":"Impide stock negativo","input":"stock_seguro(4, 8)","output":"-1","explanation":"Un retiro mayor al stock debe rechazarse."}]'::jsonb,
   '[{"id":"stock-update","label":"Descuenta un retiro válido","expression":"stock_seguro(12, 5) == 7","expected":"7","feedback":"Resta solo después de validar.","actualExpression":"stock_seguro(12, 5)"},{"id":"stock-invalid","label":"Impide stock negativo","expression":"stock_seguro(4, 8) == -1","expected":"-1","feedback":"Un retiro mayor al stock debe rechazarse.","actualExpression":"stock_seguro(4, 8)"}]'::jsonb,
   1
@@ -1669,7 +1671,8 @@ bool necesitaReposicion(int stock, int minimo) {
 // stockSeguro(12, 5) == 7
 // Resultado esperado: 7
 ',
-  'int stockSeguro(int stock, int retiro)',
+  'int stockSeguro(int stock, int retiro)
+bool necesitaReposicion(int stock, int minimo)',
   '[{"id":"stock-update","label":"Descuenta un retiro válido","input":"stockSeguro(12, 5) == 7","output":"7","explanation":"Resta solo después de validar."},{"id":"stock-invalid","label":"Impide stock negativo","input":"stockSeguro(4, 8) == -1","output":"-1","explanation":"Un retiro mayor al stock debe rechazarse."}]'::jsonb,
   '[{"id":"stock-update","label":"Descuenta un retiro válido","expression":"stockSeguro(12, 5) == 7","expected":"7","feedback":"Resta solo después de validar."},{"id":"stock-invalid","label":"Impide stock negativo","expression":"stockSeguro(4, 8) == -1","expected":"-1","feedback":"Un retiro mayor al stock debe rechazarse."}]'::jsonb,
   1
@@ -3599,7 +3602,10 @@ select
 # (lambda l: (l.agregar(3), l.agregar(5), l.contiene(5) and l.largo == 2)[-1])(ListaEnlazada())
 # Resultado esperado: True
 ',
-  'def __init__(self)',
+  'def __init__(self)
+def agregar(self, valor)
+def eliminar(self, valor)
+def contiene(self, valor)',
   '[{"id":"list-add","label":"Agrega y encuentra","input":"(lambda l: (l.agregar(3), l.agregar(5), l.contiene(5) and l.largo == 2)[-1])(ListaEnlazada())","output":"True","explanation":"Enlaza el nuevo nodo y actualiza el largo."},{"id":"list-remove-head","label":"Elimina la cabeza","input":"(lambda l: (l.agregar(3), l.agregar(5), l.eliminar(3) and not l.contiene(3) and l.largo == 1)[-1])(ListaEnlazada())","output":"True","explanation":"Actualiza cabeza cuando eliminas el primer nodo."}]'::jsonb,
   '[{"id":"list-add","label":"Agrega y encuentra","expression":"(lambda l: (l.agregar(3), l.agregar(5), l.contiene(5) and l.largo == 2)[-1])(ListaEnlazada())","expected":"True","feedback":"Enlaza el nuevo nodo y actualiza el largo."},{"id":"list-remove-head","label":"Elimina la cabeza","expression":"(lambda l: (l.agregar(3), l.agregar(5), l.eliminar(3) and not l.contiene(3) and l.largo == 1)[-1])(ListaEnlazada())","expected":"True","feedback":"Actualiza cabeza cuando eliminas el primer nodo."}]'::jsonb,
   1
@@ -3969,7 +3975,11 @@ select
 # (lambda q: (q.encolar(4), q.encolar(8), q.desencolar() == 4 and q.frente() == 8)[-1])(Cola())
 # Resultado esperado: True
 ',
-  'def __init__(self)',
+  'def __init__(self)
+def encolar(self, valor)
+def desencolar(self)
+def frente(self)
+def esta_vacia(self)',
   '[{"id":"queue-order","label":"Respeta FIFO","input":"(lambda q: (q.encolar(4), q.encolar(8), q.desencolar() == 4 and q.frente() == 8)[-1])(Cola())","output":"True","explanation":"El primer valor que entra debe ser el primero que sale."},{"id":"queue-empty","label":"Maneja una cola vacía","input":"(lambda q: q.esta_vacia() and q.desencolar() is None and q.frente() is None)(Cola())","output":"True","explanation":"Define una salida estable para la cola vacía."}]'::jsonb,
   '[{"id":"queue-order","label":"Respeta FIFO","expression":"(lambda q: (q.encolar(4), q.encolar(8), q.desencolar() == 4 and q.frente() == 8)[-1])(Cola())","expected":"True","feedback":"El primer valor que entra debe ser el primero que sale."},{"id":"queue-empty","label":"Maneja una cola vacía","expression":"(lambda q: q.esta_vacia() and q.desencolar() is None and q.frente() is None)(Cola())","expected":"True","feedback":"Define una salida estable para la cola vacía."}]'::jsonb,
   1
@@ -4276,7 +4286,9 @@ select
 # (lambda a: ([a.insertar(x) for x in [8, 3, 10, 6]], a.contiene(6) and not a.contiene(9))[-1])(ArbolBusqueda())
 # Resultado esperado: True
 ',
-  'def __init__(self)',
+  'def __init__(self)
+def insertar(self, valor)
+def contiene(self, valor)',
   '[{"id":"tree-find","label":"Inserta y encuentra","input":"(lambda a: ([a.insertar(x) for x in [8, 3, 10, 6]], a.contiene(6) and not a.contiene(9))[-1])(ArbolBusqueda())","output":"True","explanation":"Compara y avanza por la rama correspondiente."},{"id":"tree-order","label":"Mantiene el orden","input":"(lambda a: ([a.insertar(x) for x in [8, 3, 10]], a.raiz[''izquierda''][''valor''] == 3 and a.raiz[''derecha''][''valor''] == 10)[-1])(ArbolBusqueda())","output":"True","explanation":"Menores van a la izquierda y mayores a la derecha."}]'::jsonb,
   '[{"id":"tree-find","label":"Inserta y encuentra","expression":"(lambda a: ([a.insertar(x) for x in [8, 3, 10, 6]], a.contiene(6) and not a.contiene(9))[-1])(ArbolBusqueda())","expected":"True","feedback":"Compara y avanza por la rama correspondiente."},{"id":"tree-order","label":"Mantiene el orden","expression":"(lambda a: ([a.insertar(x) for x in [8, 3, 10]], a.raiz[''izquierda''][''valor''] == 3 and a.raiz[''derecha''][''valor''] == 10)[-1])(ArbolBusqueda())","expected":"True","feedback":"Menores van a la izquierda y mayores a la derecha."}]'::jsonb,
   1

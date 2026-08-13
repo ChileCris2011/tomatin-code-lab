@@ -77,13 +77,13 @@ function inferSignature(language: Language, starterCode: string): string {
     .split("\n")
     .map((line) => line.trim())
     .filter(Boolean);
-  const signature =
+  const signatures =
     language === "python"
-      ? lines.find((line) => line.startsWith("def "))
-      : lines.find((line) => line.includes("(") && line.endsWith("{"));
-  return (signature ?? lines[0] ?? "")
-    .replace(/\s*\{$/, "")
-    .replace(/:$/, "");
+      ? lines.filter((line) => line.startsWith("def "))
+      : lines.filter((line) => line.includes("(") && line.endsWith("{") && !line.includes(";") && !line.includes(":"));
+  return (signatures.length ? signatures : [lines[0] ?? ""])
+    .map((signature) => signature.replace(/\s*\{$/, "").replace(/:$/, ""))
+    .join("\n");
 }
 
 function exampleFromTest(testCase: MissionTest, index: number): MissionExample {

@@ -21,6 +21,12 @@ interface WorkerResponse {
   stack?: string;
 }
 
+interface ManualRunnerRequest {
+  language: Exclude<Language, "cpp">;
+  code: string;
+  expression: string;
+}
+
 function localRunStatus(response: WorkerResponse): RunStatus {
   if (!response.ok) return "runtime_error";
   return response.tests.length > 0 && response.tests.every((entry) => entry.passed)

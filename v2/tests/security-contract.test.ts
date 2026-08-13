@@ -118,6 +118,10 @@ describe("security contracts", () => {
       resolve("supabase/functions/_shared/github-submissions.ts"),
       "utf8",
     );
+    const notificationService = readFileSync(
+      resolve("supabase/functions/notify-assignment/index.ts"),
+      "utf8",
+    );
 
     expect(accessPage).toContain("Continuar con GitHub");
     expect(accessPage).not.toContain("magic-email");
@@ -148,6 +152,10 @@ describe("security contracts", () => {
     expect(repositoryService).not.toContain("/collaborators/");
     expect(repositoryService).toContain("attempt < 3");
     expect(repositoryService).toContain("error.status !== 409");
+    expect(notificationService).toContain(
+      'Deno.env.get("GITHUB_NOTIFICATION_TOKEN")',
+    );
+    expect(notificationService).toContain("Issues: Read and write");
   });
 
   it("keeps fork ownership and allowed origins configurable on the server", () => {
@@ -208,6 +216,29 @@ describe("security contracts", () => {
     );
   });
 
+  it("stores profile photos privately and scopes them to class members", () => {
+    const profileImages = readFileSync(
+      resolve(
+        "supabase/migrations/20260812184323_profile_images_and_avatar_modes.sql",
+      ),
+      "utf8",
+    );
+    const classroom = readFileSync(
+      resolve("v2/src/state/classroom-context.tsx"),
+      "utf8",
+    );
+
+    expect(profileImages).toContain("'profile-images'");
+    expect(profileImages).toContain("false,");
+    expect(profileImages).toContain("Class members read profile images");
+    expect(profileImages).toContain("viewer.user_id = auth.uid()");
+    expect(profileImages).toContain(
+      "(storage.foldername(name))[1] = auth.uid()::text",
+    );
+    expect(classroom).toContain("createSignedUrls(paths, 60 * 60)");
+    expect(classroom).not.toContain("getPublicUrl(profile");
+  });
+
   it("runs frontend-only E2E through the documented root entrypoint", () => {
     const playwrightConfig = readFileSync(
       resolve("v2/playwright.config.ts"),
@@ -222,7 +253,7 @@ describe("security contracts", () => {
     );
     expect(playwrightConfig).toContain('"http://127.0.0.1:4173/"');
     expect(playwrightConfig).toContain(
-      '"http://127.0.0.1:4173/tomatin-code-lab/beta/"',
+      '"http://127.0.0.1:4173/tomatin-code-lab/"',
     );
     expect(playwrightConfig).toContain("baseURL: serverUrl");
     expect(playwrightConfig).toContain("url: serverUrl");

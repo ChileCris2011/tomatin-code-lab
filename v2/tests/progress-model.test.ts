@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  isSubmissionLockedStatus,
   progressAfterAttempt,
   progressAfterReview,
 } from "@/models/progress";
@@ -38,6 +39,14 @@ function attempt(passed: boolean, kind: Attempt["kind"] = "submit"): Attempt {
 }
 
 describe("assignment progress", () => {
+  it("locks submissions only while awaiting review or approved", () => {
+    expect(isSubmissionLockedStatus("not_started")).toBe(false);
+    expect(isSubmissionLockedStatus("in_progress")).toBe(false);
+    expect(isSubmissionLockedStatus("changes_requested")).toBe(false);
+    expect(isSubmissionLockedStatus("awaiting_review")).toBe(true);
+    expect(isSubmissionLockedStatus("approved")).toBe(true);
+  });
+
   it("moves a passing submission into mentor review", () => {
     expect(progressAfterAttempt(initial, attempt(true))).toMatchObject({
       status: "awaiting_review",
@@ -54,6 +63,30 @@ describe("assignment progress", () => {
       lastEvent: "ran",
       attempts: 1,
       submittedAt: undefined,
+    });
+  });
+
+  it("ignores duplicate submissions while a task is locked", () => {
+    const locked = {
+      ...initial,
+      status: "awaiting_review" as const,
+      attempts: 1,
+      submittedAt: "2026-07-25T12:00:00.000Z",
+    };
+
+    expect(progressAfterAttempt(locked, attempt(true))).toEqual(locked);
+  });
+
+  it("allows a new submission after mentor changes are requested", () => {
+    expect(
+      progressAfterAttempt(
+        { ...initial, status: "changes_requested" },
+        attempt(true),
+      ),
+    ).toMatchObject({
+      status: "awaiting_review",
+      attempts: 1,
+      submittedAt: "2026-07-25T12:00:00.000Z",
     });
   });
 

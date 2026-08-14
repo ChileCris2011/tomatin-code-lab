@@ -1,9 +1,25 @@
-import type { Attempt, Review, StudentProgress } from "@/types";
+import type {
+  AssignmentStatus,
+  Attempt,
+  Review,
+  StudentProgress,
+} from "@/types";
+
+export function isSubmissionLockedStatus(status: AssignmentStatus): boolean {
+  return status === "awaiting_review" || status === "approved";
+}
 
 export function progressAfterAttempt(
   progress: StudentProgress,
   attempt: Attempt,
 ): StudentProgress {
+  if (
+    attempt.kind === "submit" &&
+    isSubmissionLockedStatus(progress.status)
+  ) {
+    return progress;
+  }
+
   const passed =
     attempt.result.tests.length > 0 &&
     attempt.result.tests.every((test) => test.passed);

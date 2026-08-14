@@ -1261,7 +1261,7 @@ function ReviewQueue() {
                 onClick={() => void decide("changes_requested")}
               >
                 <XCircle aria-hidden="true" />
-                Pedir cambios
+                Pedir cambios y reabrir
               </button>
               <button
                 className="button primary"

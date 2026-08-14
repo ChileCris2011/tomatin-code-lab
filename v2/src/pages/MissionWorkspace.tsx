@@ -412,6 +412,12 @@ export function Component() {
   const mission =
     studentView && !validAssignment ? undefined : resolvedMission;
   const assignmentStatus = progress?.status ?? "not_started";
+  const submissionLockMessage =
+    assignmentStatus === "awaiting_review"
+      ? "Tu entrega ya está esperando revisión del mentor."
+      : assignmentStatus === "approved"
+        ? "Esta tarea ya fue aprobada."
+        : "";
   const assignmentOverdue = validAssignment
     ? isOverdue(validAssignment.dueAt, assignmentStatus)
     : false;
@@ -830,11 +836,16 @@ export function Component() {
       createdAt: annotatedResult.createdAt,
     };
     recordAttempt(attempt);
-    if (validAssignment && activeProfile.role === "student") {
+    if (
+      validAssignment &&
+      activeProfile.role === "student" &&
+      kind === "run" &&
+      language !== "cpp"
+    ) {
       recordActivity(
         validAssignment.id,
         language,
-        kind === "submit" ? "submitted" : "ran",
+        "ran",
       );
     }
     setRunning(null);
@@ -1516,11 +1527,11 @@ export function Component() {
               title={
                 frontendOnly
                   ? "Las entregas requieren el backend oficial"
-                  : submissionLocked
-                    ? submissionLockedTitle
-                  : submitNeedsRun
-                  ? "Ejecuta este código antes de entregarlo"
-                  : undefined
+                  : submissionLockMessage
+                    ? submissionLockMessage
+                    : submitNeedsRun
+                      ? "Ejecuta este código antes de entregarlo"
+                      : undefined
               }
               onClick={() => void execute("submit")}
             >

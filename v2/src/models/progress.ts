@@ -37,6 +37,7 @@ export function progressAfterAttempt(
     attempts: progress.attempts + 1,
     lastActivityAt: attempt.createdAt,
     submittedAt: submitted ? attempt.createdAt : progress.submittedAt,
+    submittedAttemptId: submitted ? attempt.id : progress.submittedAttemptId,
   };
 }
 
@@ -53,6 +54,10 @@ export function progressAfterReview(
       review.decision === "approved"
         ? progress.approvedAt ?? review.createdAt
         : progress.approvedAt,
+    submittedAttemptId:
+      review.decision === "changes_requested"
+        ? undefined
+        : progress.submittedAttemptId,
     lastActivityAt: review.createdAt,
   };
 }

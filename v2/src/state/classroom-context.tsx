@@ -36,6 +36,7 @@ import {
   supabase,
 } from "@/services/supabase";
 import {
+  isSubmissionLockedStatus,
   progressAfterAttempt,
   progressAfterReview,
 } from "@/models/progress";
@@ -363,6 +364,7 @@ async function fetchSupabaseSnapshot(session: Session) {
         lastEvent: row.last_event ?? undefined,
         lastActivityAt: row.last_activity_at ?? undefined,
         submittedAt: row.submitted_at ?? undefined,
+        submittedAttemptId: row.submitted_attempt_id ?? undefined,
         approvedAt: row.approved_at ?? undefined,
         attempts: row.attempts,
         hintsUsed: row.hints_used,
@@ -737,6 +739,18 @@ export function ClassroomProvider({ children }: { children: ReactNode }) {
       const assignment = snapshot.assignments.find(
         (entry) => entry.id === attempt.assignmentId,
       );
+      const currentProgress = snapshot.progress.find(
+        (entry) =>
+          entry.userId === profile.id &&
+          entry.assignmentId === attempt.assignmentId,
+      );
+      if (
+        attempt.kind === "submit" &&
+        currentProgress &&
+        isSubmissionLockedStatus(currentProgress.status)
+      ) {
+        return;
+      }
       const passed =
         attempt.result.tests.length > 0 &&
         attempt.result.tests.every((entry) => entry.passed);

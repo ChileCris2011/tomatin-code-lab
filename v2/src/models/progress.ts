@@ -1,9 +1,25 @@
-import type { Attempt, Review, StudentProgress } from "@/types";
+import type {
+  AssignmentStatus,
+  Attempt,
+  Review,
+  StudentProgress,
+} from "@/types";
+
+export function isSubmissionLockedStatus(status: AssignmentStatus): boolean {
+  return status === "awaiting_review" || status === "approved";
+}
 
 export function progressAfterAttempt(
   progress: StudentProgress,
   attempt: Attempt,
 ): StudentProgress {
+  if (
+    attempt.kind === "submit" &&
+    isSubmissionLockedStatus(progress.status)
+  ) {
+    return progress;
+  }
+
   const passed =
     attempt.result.tests.length > 0 &&
     attempt.result.tests.every((test) => test.passed);
@@ -21,6 +37,7 @@ export function progressAfterAttempt(
     attempts: progress.attempts + 1,
     lastActivityAt: attempt.createdAt,
     submittedAt: submitted ? attempt.createdAt : progress.submittedAt,
+    submittedAttemptId: submitted ? attempt.id : progress.submittedAttemptId,
   };
 }
 
@@ -37,6 +54,10 @@ export function progressAfterReview(
       review.decision === "approved"
         ? progress.approvedAt ?? review.createdAt
         : progress.approvedAt,
+    submittedAttemptId:
+      review.decision === "changes_requested"
+        ? undefined
+        : progress.submittedAttemptId,
     lastActivityAt: review.createdAt,
   };
 }

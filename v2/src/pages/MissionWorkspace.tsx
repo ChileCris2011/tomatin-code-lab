@@ -56,6 +56,7 @@ import {
 } from "@/services/mission-admin";
 import { useClassroom } from "@/state/classroom-context";
 import { useCatalog } from "@/state/catalog";
+import { isSubmissionLockedStatus } from "@/models/progress";
 import {
   LANGUAGE_META,
   LANGUAGES,
@@ -411,6 +412,12 @@ export function Component() {
   const mission =
     studentView && !validAssignment ? undefined : resolvedMission;
   const assignmentStatus = progress?.status ?? "not_started";
+  const submissionLockMessage =
+    assignmentStatus === "awaiting_review"
+      ? "Tu entrega ya está esperando revisión del mentor."
+      : assignmentStatus === "approved"
+        ? "Esta tarea ya fue aprobada."
+        : "";
   const assignmentOverdue = validAssignment
     ? isOverdue(validAssignment.dueAt, assignmentStatus)
     : false;
@@ -729,6 +736,17 @@ export function Component() {
   const activeProfile = viewProfile;
   const allowedLanguages = validAssignment?.allowedLanguages ?? [...LANGUAGES];
   const currentCode = codeByLanguage[language];
+  const submissionLocked = Boolean(
+    validAssignment &&
+      studentView &&
+      isSubmissionLockedStatus(assignmentStatus),
+  );
+  const submissionLockedTitle =
+    assignmentStatus === "awaiting_review"
+      ? "Tu entrega está esperando revisión del mentor"
+      : assignmentStatus === "approved"
+        ? "Esta tarea ya fue aprobada"
+        : undefined;
   const currentExecutionFingerprint = executionFingerprint(
     activeMission.id,
     activeMission.version,
@@ -776,6 +794,7 @@ export function Component() {
   async function execute(kind: AttemptKind) {
     if (
       isStudentPreview ||
+      (kind === "submit" && submissionLocked) ||
       (kind === "submit" && submitNeedsRun) ||
       (frontendOnly && (kind === "submit" || language === "cpp"))
     ) return;
@@ -817,11 +836,16 @@ export function Component() {
       createdAt: annotatedResult.createdAt,
     };
     recordAttempt(attempt);
-    if (validAssignment && activeProfile.role === "student") {
+    if (
+      validAssignment &&
+      activeProfile.role === "student" &&
+      kind === "run" &&
+      language !== "cpp"
+    ) {
       recordActivity(
         validAssignment.id,
         language,
-        kind === "submit" ? "submitted" : "ran",
+        "ran",
       );
     }
     setRunning(null);
@@ -1496,15 +1520,18 @@ export function Component() {
               disabled={
                 Boolean(running) ||
                 isStudentPreview ||
+                submissionLocked ||
                 submitNeedsRun ||
                 frontendOnly
               }
               title={
                 frontendOnly
                   ? "Las entregas requieren el backend oficial"
-                  : submitNeedsRun
-                  ? "Ejecuta este código antes de entregarlo"
-                  : undefined
+                  : submissionLockMessage
+                    ? submissionLockMessage
+                    : submitNeedsRun
+                      ? "Ejecuta este código antes de entregarlo"
+                      : undefined
               }
               onClick={() => void execute("submit")}
             >
@@ -1513,7 +1540,11 @@ export function Component() {
               ) : (
                 <Send aria-hidden="true" />
               )}
-              {validAssignment ? "Entregar" : "Comprobar"}
+              {submissionLocked && assignmentStatus === "awaiting_review"
+                ? "En revisión"
+                : validAssignment
+                  ? "Entregar"
+                  : "Comprobar"}
             </button>
           </div>
           </section>

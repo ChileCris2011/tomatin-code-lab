@@ -1515,7 +1515,7 @@ export function Component() {
               Ejecutar
             </button>
             <button
-              className="button primary"
+              className="button primary entregar-button"
               type="button"
               disabled={
                 Boolean(running) ||

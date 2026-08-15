@@ -42,7 +42,7 @@ test("runs visible tests while an active submission remains locked", async ({
   await expect
     .poll(() => page.evaluate(() => window.__TOMATIN_EDITOR__?.getValue()))
     .toContain("const preciosEjemplo = [1200, 850]");
-  await expect(page.getByRole("button", { name: "Entregar" })).toBeDisabled();
+  await expect(page.locator(".entregar-button")).toBeDisabled();
 
   await page.getByRole("button", { name: "Ejecutar" }).click();
   await expect(
@@ -50,8 +50,8 @@ test("runs visible tests while an active submission remains locked", async ({
   ).toBeVisible({ timeout: 15_000 });
   await expect(page.getByText("Qué hacer ahora")).toBeVisible();
   await expect(page.getByText("Compara un caso paso a paso")).toBeVisible();
-  await expect(page.getByRole("button", { name: "Entregar" })).toBeDisabled();
-  await expect(page.getByRole("button", { name: "Entregar" })).toHaveAttribute(
+  await expect(page.locator(".entregar-button")).toBeDisabled();
+  await expect(page.locator(".entregar-button")).toHaveAttribute(
     "title",
     "Tu entrega ya está esperando revisión del mentor.",
   );
@@ -65,12 +65,12 @@ test("unlocks an editable assignment after running the current code", async ({
     .filter({ hasText: "Recorridos seguros" })
     .first();
   await task.click();
-  await expect(page.getByRole("button", { name: "Entregar" })).toBeDisabled();
+  await expect(page.locator(".entregar-button")).toBeDisabled();
   await page.getByRole("button", { name: "Ejecutar" }).click();
   await expect(page.getByText("Qué hacer ahora")).toBeVisible({
     timeout: 15_000,
   });
-  await expect(page.getByRole("button", { name: "Entregar" })).toBeEnabled();
+  await expect(page.locator(".entregar-button")).toBeEnabled();
 });
 
 test("explains that console output is not the function response", async ({ page }) => {

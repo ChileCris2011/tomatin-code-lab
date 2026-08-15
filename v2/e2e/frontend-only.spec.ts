@@ -39,11 +39,11 @@ test("frontend sandbox keeps the current student UI without backend calls", asyn
     page.getByRole("heading", { name: "La once de Tomatin" }),
   ).toBeVisible();
   await expect(page.getByRole("button", { name: "Ejecutar" })).toBeEnabled();
-  await expect(page.getByRole("button", { name: "Entregar" })).toBeDisabled();
+  await expect(page.locator(".entregar-button")).toBeDisabled();
 
   await page.getByRole("button", { name: "C++", exact: true }).click();
   await expect(page.getByRole("button", { name: "Ejecutar" })).toBeDisabled();
-  await expect(page.getByRole("button", { name: "Entregar" })).toBeDisabled();
+  await expect(page.locator(".entregar-button")).toBeDisabled();
 
   await page.locator(".profile-menu-trigger").click();
   await page.getByRole("menuitem", { name: "Editar perfil" }).click();

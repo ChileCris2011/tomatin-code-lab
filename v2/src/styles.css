@@ -183,6 +183,12 @@ code,
   border-color: var(--green);
 }
 
+.button.primary.entregar-button {
+  color: var(--green-ink);
+  background: var(--green);
+  border-color: var(--green);
+}
+
 .button.primary:hover:not(:disabled) {
   background: #88efb5;
 }

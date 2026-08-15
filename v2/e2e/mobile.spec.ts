@@ -36,7 +36,7 @@ test("mobile navigation and workspace remain inside the viewport", async ({
     .toBeGreaterThan(0);
   await page.getByRole("tab", { name: "Código" }).click();
   await expect(page.getByRole("button", { name: "Ejecutar" })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Entregar" })).toBeVisible();
+  await expect(page.locator(".entregar-button")).toBeVisible();
   expect(
     await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
   ).toBe(true);

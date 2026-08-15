@@ -281,7 +281,7 @@ test("owner can inspect a student in read-only mode and return to admin", async 
   await expect(page.getByText("Vista estudiante")).toBeVisible();
   await page.getByRole("link", { name: "Continuar" }).click();
   await expect(page.getByRole("button", { name: "Ejecutar" })).toBeDisabled();
-  await expect(page.getByRole("button", { name: "Entregar" })).toBeDisabled();
+  await expect(page.locator(".entregar-button")).toBeDisabled();
   await expect(page.getByRole("tab", { name: "Solución" })).toHaveCount(0);
 
   await page
